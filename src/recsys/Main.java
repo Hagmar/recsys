@@ -1,23 +1,24 @@
 package recsys;
 
+import recsys.core.Data;
 import recsys.core.RecommenderSystem;
 import recsys.core.SimilarityFunction;
 
 public class Main {
 
-    private RecommenderSystem<Integer, Integer> system;
+    public static void main(String[] args) {
+        // TODO: Parse the data files
+        DataContainer data = new DataContainer();
+        // data.parse();
 
-    public void main(String[] args) {
-        // TODO: Parse the files and create a Data class
-        // Data data = new DataContainer();
-        // data.insert(...);
+        // Instantiate similarity function
+        SimilarityFunction<Integer> similarity = new UserSimilarity();
 
-        // TODO: Instantiate a similarity function
-        // SimilarityFunction similarity = new UserSimilarity();
-        // TODO: Pass the Data class and Similarity function to RecommenderSystem
-        // system = new RecommenderSystem<Integer, Integer>(data, similarity);
+        // Create recommender system
+        RecommenderSystem<Integer, Integer> system = new RecommenderSystem<>(data, similarity);
 
-        // TODO: Run requested method on RecommenderSystem (maybe specify from command line?)
-        // system.predictRating(...)
+        // Run command line interface
+        CLI commandLineInterface = new CLI(system);
+        commandLineInterface.run();
     }
 }
