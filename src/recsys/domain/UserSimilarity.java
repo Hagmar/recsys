@@ -5,6 +5,9 @@ import recsys.core.SimilarityFunction;
 
 import java.util.Map;
 
+/**
+ * Computes the cosine similarity between two users.
+ */
 public class UserSimilarity implements SimilarityFunction<Integer> {
     @Override
     public double similarity(Integer user1, Integer user2, Data<Integer, ?> data) {
@@ -18,9 +21,9 @@ public class UserSimilarity implements SimilarityFunction<Integer> {
             ratings1 = smaller;
         }
 
-        // Calculate similarity (cosine similarity)
+        // Calculate similarity: cosine similarity = dotProduct(u1, u2) / (||u1|| * ||u2||)
         int scalarProduct = 0;
-        int length1 = 0, length2 = 0;   // ||u1||, ||u2|| length of rating vectors u1 and u2
+        int length1 = 0, length2 = 0;   // ||u1||, ||u2|| length of rating vectors u1 and u2 (squared)
         for (Map.Entry<?, Integer> u1 : ratings1.entrySet()) {
             Integer rating2 = ratings2.get(u1.getKey());
             if (rating2 != null) {
