@@ -3,6 +3,9 @@ Recommender system
 
 ## Run
 
+### Load your dataset
+Download the dataset from [GroupLens](http://www.grouplens.org/node/73). Extract the dataset .zip folder in the root of this project, so that you have a folder /ml-100k for instance.
+
 ### From command line
 Run your compiled `Main` class from the terminal (or your IDE).
 
@@ -12,6 +15,8 @@ Available commands:
 * `recommend <user-id> <limit-items>` | Returns a *limit-items* number of items that are have the highest predicted rating.
 
 ## For developers
-The `core` package contains domain independent classes and interfaces for the recommender system. Implement these interfaces in classes for the specific domain in the root (or another) package.
+The `core` package contains domain independent classes and interfaces for the recommender system.
 
-The class `core/RecommenderSystem` is the main interface for the recommender system functionality. `Main` is supposed to run a command line interface using an instance of `core/RecommenderSystsem`.
+Put domain specific classes in the `domain` package. These classes are implementations of the interfaces in `core`.
+
+The class `core/RecommenderSystem` is the main interface for the recommender system functionality. `Main` runs a command line interface that is using an instance of `core/RecommenderSystsem`.

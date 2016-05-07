@@ -1,4 +1,4 @@
-package recsys;
+package recsys.domain;
 
 import recsys.core.Data;
 import recsys.core.SimilarityFunction;

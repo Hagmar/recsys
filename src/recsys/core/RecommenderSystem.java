@@ -19,13 +19,13 @@ public class RecommenderSystem<User, Item> {
     }
 
     public double predictRating(User user, Item item) {
-        // TODO: implement
-        // Use similarity and data fields to predict rating
-        return 0;
+        // TODO: Implement - Use similarity and data fields to predict rating
+        Integer rating = data.getRating(user, item);
+        return rating != null ? rating : 0;
     }
 
     public Collection<Item> getRecommendedItems(User user, int numberOfItems) {
-        // TODO: implement
+        // TODO: Implement
         return new LinkedList<>();
     }
 }
