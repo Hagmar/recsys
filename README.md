@@ -14,9 +14,15 @@ Available commands:
 * `predict <user-id> <item-id>` | Predicts the rating for a user and an item.
 * `recommend <user-id> <limit-items>` | Returns a *limit-items* number of items that are have the highest predicted rating.
 
+### Cross-validation using Weka libraries
+Run `weka/TestRunner` to perform a k-fold cross validation.
+
 ## Development setup
 ### Libraries
 Make sure the `*.jar` files in the `libs` folder are included as libraries in your project. Add those manually in your IDE.
+
+### Weka database
+The file `DatabaseUtils.props` contains the path to your database file (relative from root folder). Change this path if the database is not found when running Weka tests. 
 
 ## Project structure
 The `core` package contains domain independent classes and interfaces for the recommender system.

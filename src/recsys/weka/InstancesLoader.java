@@ -12,13 +12,25 @@ import java.io.File;
 class InstancesLoader {
 
     public static Instances get() throws Exception {
-        return getFromFile();
+        return getFromDatabase();
     }
 
     private static Instances getFromDatabase() throws Exception {
-        InstanceQuery query = new InstanceQuery();      // TODO: implement when database is ready
-        query.setQuery("select * from whatsoever");
-        return query.retrieveInstances();
+        InstanceQuery query = new InstanceQuery();
+        query.setQuery("select * from ratings");
+
+        Instances instances = query.retrieveInstances();
+
+        // Set attribute names
+        instances.renameAttribute(0, "user");
+        instances.renameAttribute(1, "movie");
+        instances.renameAttribute(2, "rating");
+        instances.deleteAttributeAt(3);     // timestamp
+
+        // Set class
+        instances.setClass(instances.attribute("rating"));
+
+        return instances;
     }
 
     private static Instances getFromFile() throws Exception {
