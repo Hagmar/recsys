@@ -8,15 +8,16 @@ import os
 def main():
     args = parse_args()
 
-    dataset_path = os.path.basename(args.dataset)
     if not args.d:
-        extract_dataset(args.dataset, dataset_path)
+        extract_dataset(args.dataset)
+        dataset_name = os.path.splitext(os.path.basename(args.dataset))[0]
+        args.dataset = dataset_name
 
     if not args.database:
-        args.database = dataset_path + '/movielens.db'
+        args.database = os.path.join(args.dataset, 'movielens.db')
 
     if args.mode == '100K':
-        generate_database_100K(dataset_path, args.database)
+        generate_database_100K(args.dataset, args.database)
     else:
         print('Other dataset formats not implemented yet. Stick to 100K')
 
@@ -24,23 +25,20 @@ def main():
 def parse_args():
     parser = argparse.ArgumentParser(description='Create database from MovieLens dataset')
     parser.add_argument('dataset', help='Zip-file containing the dataset')
-    parser.add_argument('database', nargs='?', help='The file in which to store the database. Defaults to the same filename as the dataset, in the current working directory')
-    parser.add_argument('-d', '--d', action='store_true', help='Interpret provided dataset as a folder where data has already been extracted')
+    parser.add_argument('database', nargs='?', help='The file in which to store the database. Defaults to "movielens.db", in the current working directory')
+    parser.add_argument('-d', '--d', action='store_true', help='Interpret provided dataset as a folder where data has already been extracted instead of as a zip')
     parser.add_argument('--mode', choices=['100K', '1M', '10M', '20M'], default='100K', help='Specify which format the dataset is in')
 
     args = parser.parse_args()
     return args
 
 
-def extract_dataset(dataset, dataset_path):
-    if not os.path.isdir(dataset_path):
-        os.mkdir(dataset_path)
-
+def extract_dataset(dataset):
     with zipfile.ZipFile(dataset, 'r') as datazip:
-        datazip.extractall(dataset_path)
+        datazip.extractall()
 
 
-def generate_database_100K(dataset_path, database):
+def generate_database_100K(dataset, database):
     if os.path.isfile(database):
         os.remove(database)
 
@@ -50,19 +48,19 @@ def generate_database_100K(dataset_path, database):
 
     create_tables(c)
 
-    occupation_map = parse_occupation_data(dataset_path, c)
-    parse_genre_data(dataset_path, c)
-    parse_movie_data(dataset_path, c)
-    parse_user_data(dataset_path, c, occupation_map)
-    parse_rating_data(dataset_path, c)
+    occupation_map = parse_occupation_data(dataset, c)
+    parse_genre_data(dataset, c)
+    parse_movie_data(dataset, c)
+    parse_user_data(dataset, c, occupation_map)
+    parse_rating_data(dataset, c)
 
     conn.commit()
     conn.close()
 
-def parse_occupation_data(dataset_path, c):
+def parse_occupation_data(dataset, c):
     occupation_map = {}
     insert_occupation_query = 'INSERT INTO occupations(occupation) VALUES (?)'
-    with open(os.path.join(dataset_path, 'ml-100k/u.occupation'), 'r') as occFile:
+    with open(os.path.join(dataset, 'u.occupation'), 'r') as occFile:
         for line in occFile:
             if line.rstrip():
                 occupation = line.rstrip()
@@ -71,18 +69,18 @@ def parse_occupation_data(dataset_path, c):
 
     return occupation_map
 
-def parse_genre_data(dataset_path, c):
+def parse_genre_data(dataset, c):
     insert_genre_query = 'INSERT INTO genres(id, name) VALUES (?, ?)'
-    with open(os.path.join(dataset_path, 'ml-100k/u.genre'), 'r') as genreFile:
+    with open(os.path.join(dataset, 'u.genre'), 'r') as genreFile:
         for line in genreFile:
             if line.rstrip():
                 [genre, gid] = line.rstrip().split('|')
                 c.execute(insert_genre_query, (gid, genre))
 
-def parse_movie_data(dataset_path, c):
+def parse_movie_data(dataset, c):
     insert_movie_query = 'INSERT INTO movies(id, title, releasedate) VALUES (?, ?, ?)'
     insert_moviegenre_query = 'INSERT INTO moviegenres(movie, genre) VALUES (?, ?)'
-    with open(os.path.join(dataset_path, 'ml-100k/u.item'), 'r') as movieFile:
+    with open(os.path.join(dataset, 'u.item'), 'r') as movieFile:
         for line in movieFile:
             if line.rstrip():
                 splitline = line.rstrip().split('|')
@@ -96,9 +94,9 @@ def parse_movie_data(dataset_path, c):
                     if isGenre == '1':
                         c.execute(insert_moviegenre_query, (movie_id, genre))
 
-def parse_user_data(dataset_path, c, occupation_map):
+def parse_user_data(dataset, c, occupation_map):
     insert_user_query = 'INSERT INTO users(id, age, gender, occupation, zipcode) VALUES (?, ?, ?, ?, ?)'
-    with open(os.path.join(dataset_path, 'ml-100k/u.user'), 'r') as userFile:
+    with open(os.path.join(dataset, 'u.user'), 'r') as userFile:
         for line in userFile:
             if line.rstrip():
                 splitline = line.rstrip().split('|')
@@ -110,9 +108,9 @@ def parse_user_data(dataset_path, c, occupation_map):
                 c.execute(insert_user_query,
                         (user_id, age, gender, occupation, zipcode))
 
-def parse_rating_data(dataset_path, c):
+def parse_rating_data(dataset, c):
     insert_rating_query = 'INSERT INTO ratings(user, movie, rating, timestamp) VALUES (?, ?, ?, ?)'
-    with open(os.path.join(dataset_path, 'ml-100k/u.data'), 'r') as ratingFile:
+    with open(os.path.join(dataset, 'u.data'), 'r') as ratingFile:
         for line in ratingFile:
             if line.rstrip():
                 splitline = line.rstrip().split('\t')
