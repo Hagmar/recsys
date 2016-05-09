@@ -4,6 +4,7 @@ import recsys.core.Data;
 import recsys.core.RecommenderSystem;
 import recsys.core.SimilarityFunction;
 import recsys.domain.InMemoryData;
+import recsys.domain.SimilarityFunctionFactory;
 import recsys.domain.UserSimilarity;
 
 public class Main {
@@ -13,7 +14,7 @@ public class Main {
         Data<Integer, Integer> data = new InMemoryData("ml-100k/u.data");
 
         // Instantiate the similarity function to use
-        SimilarityFunction<Integer> similarity = new UserSimilarity();
+        SimilarityFunction<Integer> similarity = SimilarityFunctionFactory.getFunction();
 
         // Create recommender system
         RecommenderSystem<Integer, Integer> system = new RecommenderSystem<>(data, similarity);
