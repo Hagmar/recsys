@@ -17,7 +17,7 @@ class InstancesLoader {
 
     private static Instances getFromDatabase() throws Exception {
         InstanceQuery query = new InstanceQuery();
-        query.setQuery("select * from ratings");
+        query.setQuery("SELECT user, movie, rating FROM ratings");
 
         Instances instances = query.retrieveInstances();
 
@@ -25,7 +25,6 @@ class InstancesLoader {
         instances.renameAttribute(0, "user");
         instances.renameAttribute(1, "movie");
         instances.renameAttribute(2, "rating");
-        instances.deleteAttributeAt(3);     // timestamp
 
         // Set class
         instances.setClass(instances.attribute("rating"));
