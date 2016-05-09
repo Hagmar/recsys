@@ -14,6 +14,10 @@ public class UserSimilarity implements SimilarityFunction<Integer> {
         Map<?, Integer> ratings1 = data.getRatings(user1);
         Map<?, Integer> ratings2 = data.getRatings(user2);
 
+        return cosineSimilarity(ratings1, ratings2);
+    }
+
+    private double cosineSimilarity(Map<?, Integer> ratings1, Map<?, Integer> ratings2) {
         // Set ratings1 as the smaller set
         if (ratings2.size() < ratings1.size()) {
             Map<?, Integer> smaller = ratings2;
