@@ -18,9 +18,7 @@ public class TestRunner {
 
         Instances data = InstancesLoader.get();
         Classifier cls = new RecommenderClassifier();
-
         cls.buildClassifier(data);
-        System.out.println("Classifier build finished.");
 
         Evaluation eval = new Evaluation(data);
         Random rand = new Random(1);        // Using seed = 1

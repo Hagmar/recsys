@@ -2,8 +2,6 @@ package recsys.weka;
 
 import weka.core.Instances;
 import weka.core.converters.CSVLoader;
-import weka.core.converters.ConverterUtils;
-import weka.core.converters.Loader;
 import weka.experiment.InstanceQuery;
 
 import java.io.File;
@@ -27,7 +25,8 @@ class InstancesLoader {
         // Read all the instances in the file (ARFF, CSV, XRFF, ...)
         CSVLoader loader = new CSVLoader();
         loader.setSource(new File("ml-100k/u.data"));
-        loader.setOptions(weka.core.Utils.splitOptions("-F '\t'"));     // Set CSV delimiter
+        String options = "-H -F '\t'";         // Set CSV delimiter and no header
+        loader.setOptions(weka.core.Utils.splitOptions(options));
 
         Instances instances = loader.getDataSet();
 
