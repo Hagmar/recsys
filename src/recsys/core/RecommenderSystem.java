@@ -1,5 +1,6 @@
 package recsys.core;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.LinkedList;
 
@@ -8,7 +9,7 @@ import java.util.LinkedList;
  * @param <User> The identifier of a user.
  * @param <Item> The identifier of an item.
  */
-public class RecommenderSystem<User, Item> {
+public class RecommenderSystem<User, Item> implements Serializable {
 
     private final Data<User, Item> data;
     private final SimilarityFunction<User> similarity;
