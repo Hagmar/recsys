@@ -1,5 +1,6 @@
 package recsys.core;
 
+import java.util.Collection;
 import java.util.Map;
 
 /**
@@ -22,4 +23,10 @@ public interface Data<User, Item> {
      * @return The rating or null if no rating exists.
      */
     Integer getRating(User user, Item item);
+
+    /**
+     * Returns all users in the dataset.
+     * @return A collection of users.
+     */
+    Collection<User> getUsers();
 }

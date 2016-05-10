@@ -3,6 +3,7 @@ package recsys.domain;
 import recsys.core.Data;
 
 import java.io.*;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,6 +36,11 @@ public class InMemoryData implements Data<Integer, Integer>, Serializable {
         if (userRatings == null)
             return null;
         return userRatings.get(item);
+    }
+
+    @Override
+    public Collection<Integer> getUsers() {
+        return ratings.keySet();
     }
 
     public void add(int user, int item, int rating) {

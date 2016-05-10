@@ -4,6 +4,8 @@ import org.junit.Test;
 import recsys.core.Data;
 import recsys.core.SimilarityFunction;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -13,6 +15,9 @@ import static org.junit.Assert.assertEquals;
  * @author Anton Jansson.
  */
 public class UserSimilarityTest {
+
+    /** Precision for floating number tests. Expected result must be this accurate. */
+    private static final double PREC = 0.00000000001;
 
     // Mock data container
     private final Data<Integer, Integer> data = new Data<Integer, Integer>() {
@@ -43,10 +48,12 @@ public class UserSimilarityTest {
         public Integer getRating(Integer integer, Integer integer2) {
             return null;
         }
-    };
 
-    /** Precision for floating number tests. Expected result must be this accurate. */
-    private static final double PREC = 0.00000000001;
+        @Override
+        public Collection<Integer> getUsers() {
+            return Arrays.asList(1, 2, 3, 4);
+        }
+    };
 
     private final SimilarityFunction<Integer> similarity = new UserSimilarity();
 
