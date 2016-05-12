@@ -21,6 +21,7 @@ public class RecommenderSystem<User, Item> {
     public double predictRating(User user, Item item) {
         // TODO: Implement - Use similarity and data fields to predict rating
         Integer rating = data.getRating(user, item);
+	// Find the kNN's (using the existing similarity function), user rates the item according to the mean of the kNN
         return rating != null ? rating : 0;
     }
 
