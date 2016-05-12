@@ -3,10 +3,11 @@ package recsys.domain;
 import recsys.core.Data;
 
 import java.io.*;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-public class InMemoryData implements Data<Integer, Integer> {
+public class InMemoryData implements Data<Integer, Integer>, Serializable {
 
     private Map<Integer, Map<Integer, Integer>> ratings = new HashMap<>();
 
@@ -18,6 +19,11 @@ public class InMemoryData implements Data<Integer, Integer> {
         parseData(filepath);
         System.out.println("Data contains ratings for " + ratings.size() + " users.");
     }
+
+    /**
+     * Creates an empty data container.
+     */
+    public InMemoryData() {}
 
     @Override
     public Map<Integer, Integer> getRatings(Integer user) {
@@ -32,7 +38,12 @@ public class InMemoryData implements Data<Integer, Integer> {
         return userRatings.get(item);
     }
 
-    private void add(int user, int item, int rating) {
+    @Override
+    public Collection<Integer> getUsers() {
+        return ratings.keySet();
+    }
+
+    public void add(int user, int item, int rating) {
         Map<Integer, Integer> userRatings = ratings.get(user);
         if (userRatings == null) {
             userRatings = new HashMap<>();
