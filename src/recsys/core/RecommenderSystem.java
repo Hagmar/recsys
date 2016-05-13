@@ -33,7 +33,8 @@ public class RecommenderSystem<User, Item> implements Serializable {
         	return rating;
         }
         
-        // Find all users who have rated the item
+        // Find all users who have rated the item 
+        // TODO: add funciton to Data.java?
         LinkedList<User> hasRated = new LinkedList<User>();
         for (User u : data.getUsers()) {
         	if (data.getRating(u, item) != null) {
@@ -70,24 +71,26 @@ public class RecommenderSystem<User, Item> implements Serializable {
      * @return Map of nearest neighbors and their similarity with user
      */
     private Map<User, Double> findKNN(User user, LinkedList<User> users, int k) {
-    	Map<User, Double> kNN = new HashMap<User, Double>();
+    	Map<User, Double> kNN = new HashMap<User, Double>(); 	// map of users and similarity to user
         double minSim = 2; 		// minimum similarity of user and its k nearest neighbors
         for (User u : users) {
         	double sim = similarity.similarity(user, u, data);
         	if (kNN.size() < k) {
+        		// Fill up map
         		kNN.put(u, sim);
         		if (sim < minSim) {
         			minSim = sim;
         		}
-        	} else if(sim > minSim) {
+        	} else if(sim > minSim) { 	// add u to users and remove least similar user in users
         		kNN.put(u, sim);
         		Iterator<Entry<User, Double>> it = kNN.entrySet().iterator();
         		double oldMinSim = minSim;
-        		minSim = sim;
+        		minSim = sim;		// sim not necessarily smallest value, minSim is updated in the while loop
         		while (it.hasNext()) {
         			Map.Entry<User, Double> pair = (Entry<User, Double>) it.next();
         			double value = pair.getValue();
         			if (value == oldMinSim && kNN.size() > k) {
+        				// remove old neighbor with smallest value of similarity
         				it.remove();
         			} else if (value < minSim) {
         				minSim = value;
