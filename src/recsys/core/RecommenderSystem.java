@@ -7,7 +7,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Random;
 
 /**
  * Calculates predictions of user ratings for items and uses them to recommend items for particular users.
@@ -18,7 +17,6 @@ public class RecommenderSystem<User, Item> implements Serializable {
 
     private final Data<User, Item> data;
     private final SimilarityFunction<User> similarity;
-    private final Random random = new Random();
 
     public RecommenderSystem(Data<User, Item> data, SimilarityFunction<User> similarity) {
         this.data = data;
@@ -26,21 +24,14 @@ public class RecommenderSystem<User, Item> implements Serializable {
     }
 
     public double predictRating(User user, Item item) {
-
         Integer rating = data.getRating(user, item);
         if (rating != null) {
         	// User has already rated this item, no prediction needed
         	return rating;
         }
         
-        // Find all users who have rated the item 
-        // TODO: add funciton to Data.java?
-        LinkedList<User> hasRated = new LinkedList<User>();
-        for (User u : data.getUsers()) {
-        	if (data.getRating(u, item) != null) {
-        		hasRated.add(u);
-        	}
-        }
+        // Find all users who have rated the item
+        Collection<User> hasRated = data.getItemRatings(item).keySet();
         
         int k = 5; // TODO Used further down, might want to set this variable earlier/elsewhere?
         // Find the nearest neighbors among all the users who have rated the item
@@ -48,14 +39,12 @@ public class RecommenderSystem<User, Item> implements Serializable {
         
         // user rates the item according to the mean of the k nearest neighbors
         int sum = 0;
-        Iterator<Entry<User, Double>> it = kNN.entrySet().iterator();
-        while (it.hasNext()) {
-        	Map.Entry<User, Double> pair = (Entry<User, Double>) it.next();
-        	sum += data.getRating(pair.getKey(), item);
-        	System.out.println("sum = " + sum + ", likeness = " + pair.getValue()); // TODO: remove
+        for (Entry<User, Double> pair : kNN.entrySet()) {
+            sum += data.getRating(pair.getKey(), item);
+            // System.out.println("sum = " + sum + ", likeness = " + pair.getValue()); // TODO: remove
         }
         
-        return sum / k + 1;
+        return (float) sum / k + 1;
     }
 
     public Collection<Item> getRecommendedItems(User user, int numberOfItems) {
@@ -70,7 +59,7 @@ public class RecommenderSystem<User, Item> implements Serializable {
      * @param k Number of nearest neighbors to find
      * @return Map of nearest neighbors and their similarity with user
      */
-    private Map<User, Double> findKNN(User user, LinkedList<User> users, int k) {
+    private Map<User, Double> findKNN(User user, Collection<User> users, int k) {
     	Map<User, Double> kNN = new HashMap<User, Double>(); 	// map of users and similarity to user
         double minSim = 2; 		// minimum similarity of user and its k nearest neighbors
         for (User u : users) {

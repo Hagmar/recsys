@@ -11,7 +11,7 @@ public class Main {
 
     public static void main(String[] args) {
         // Load data container - parse the data files into memory
-        Data<Integer, Integer> data = new InMemoryData("ml-100k/u.data");
+        Data<Integer, Integer> data = new InMemoryData("ml-100k/ml-100k/u.data");
 
         // Instantiate the similarity function to use
         SimilarityFunction<Integer> similarity = SimilarityFunctionFactory.getFunction();
