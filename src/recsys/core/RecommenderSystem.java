@@ -1,11 +1,7 @@
 package recsys.core;
 
 import java.io.Serializable;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 
 /**
@@ -37,14 +33,15 @@ public class RecommenderSystem<User, Item> implements Serializable {
         // Find the nearest neighbors among all the users who have rated the item
         Map<User, Double> kNN = findKNN(user, hasRated, k); 
         
-        // user rates the item according to the mean of the k nearest neighbors
-        int sum = 0;
+        // user rates the item according to the weighted average of the k nearest neighbors
+        float sum = 0, denominator = 0;
         for (Entry<User, Double> pair : kNN.entrySet()) {
-            sum += data.getRating(pair.getKey(), item);
+            denominator += pair.getValue();
+            sum += pair.getValue() * data.getRating(pair.getKey(), item);   // Weighted sum
             // System.out.println("sum = " + sum + ", likeness = " + pair.getValue()); // TODO: remove
         }
-        
-        return (float) sum / k + 1;
+
+        return denominator > 0 ? sum / denominator : 0;
     }
 
     public Collection<Item> getRecommendedItems(User user, int numberOfItems) {
