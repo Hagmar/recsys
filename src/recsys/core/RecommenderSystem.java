@@ -22,26 +22,31 @@ public class RecommenderSystem<User, Item> implements Serializable {
     public double predictRating(User user, Item item) {
         Integer rating = data.getRating(user, item);
         if (rating != null) {
-        	// User has already rated this item, no prediction needed
-        	return rating;
+        	return rating;  // User has already rated this item, no prediction needed
         }
         
         // Find all users who have rated the item
         Collection<User> hasRated = data.getItemRatings(item).keySet();
-        
-        int k = 5; // TODO Used further down, might want to set this variable earlier/elsewhere?
+
         // Find the nearest neighbors among all the users who have rated the item
-        Map<User, Double> kNN = findKNN(user, hasRated, k); 
+        Map<User, Double> kNN = findKNN(user, hasRated, Configuration.NEAREST_NEIGHBORS_NUMBER);
         
-        // user rates the item according to the weighted average of the k nearest neighbors
+        // User rates the item according to the [weighted] average of the k nearest neighbors
         float sum = 0, denominator = 0;
         for (Entry<User, Double> pair : kNN.entrySet()) {
-            denominator += pair.getValue();
-            sum += pair.getValue() * data.getRating(pair.getKey(), item);   // Weighted sum
-            // System.out.println("sum = " + sum + ", likeness = " + pair.getValue()); // TODO: remove
+            if (Configuration.WEIGHTED_AVERAGE) {
+                denominator += pair.getValue();
+                sum += pair.getValue() * data.getRating(pair.getKey(), item);
+            } else {
+                sum += data.getRating(pair.getKey(), item);
+            }
         }
 
-        return denominator > 0 ? sum / denominator : 0;
+        if (Configuration.WEIGHTED_AVERAGE) {
+            return sum / denominator;
+        } else {
+            return sum / Configuration.NEAREST_NEIGHBORS_NUMBER;
+        }
     }
 
     public Collection<Item> getRecommendedItems(User user, int numberOfItems) {
