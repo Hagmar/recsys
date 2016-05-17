@@ -16,7 +16,7 @@ public class RecommenderSystem<User, Item> implements Serializable {
 
     public RecommenderSystem(Data<User, Item> data, SimilarityFunction<User> similarity) {
         this.data = data;
-        this.similarity = similarity;
+        this.similarity = new SimilarityCache<>(similarity);
     }
 
     public double predictRating(User user, Item item) {
