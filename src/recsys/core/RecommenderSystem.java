@@ -1,9 +1,8 @@
 package recsys.core;
 
 import java.io.Serializable;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.Random;
+import java.util.*;
+import java.util.Map.Entry;
 
 /**
  * Calculates predictions of user ratings for items and uses them to recommend items for particular users.
@@ -14,21 +13,82 @@ public class RecommenderSystem<User, Item> implements Serializable {
 
     private final Data<User, Item> data;
     private final SimilarityFunction<User> similarity;
-    private final Random random = new Random();
 
     public RecommenderSystem(Data<User, Item> data, SimilarityFunction<User> similarity) {
         this.data = data;
-        this.similarity = similarity;
+        this.similarity = new SimilarityCache<>(similarity);
     }
 
     public double predictRating(User user, Item item) {
-        // TODO: Implement - Use similarity and data fields to predict rating
         Integer rating = data.getRating(user, item);
-        return rating != null ? rating : random.nextInt(5) + 1;
+        if (rating != null) {
+        	return rating;  // User has already rated this item, no prediction needed
+        }
+        
+        // Find all users who have rated the item
+        Collection<User> hasRated = data.getItemRatings(item).keySet();
+
+        // Find the nearest neighbors among all the users who have rated the item
+        Map<User, Double> kNN = findKNN(user, hasRated, Configuration.NEAREST_NEIGHBORS_NUMBER);
+        
+        // User rates the item according to the [weighted] average of the k nearest neighbors
+        float sum = 0, denominator = 0;
+        for (Entry<User, Double> pair : kNN.entrySet()) {
+            if (Configuration.WEIGHTED_AVERAGE) {
+                denominator += pair.getValue();
+                sum += pair.getValue() * data.getRating(pair.getKey(), item);
+            } else {
+                sum += data.getRating(pair.getKey(), item);
+            }
+        }
+
+        if (Configuration.WEIGHTED_AVERAGE) {
+            return sum / denominator;
+        } else {
+            return sum / Configuration.NEAREST_NEIGHBORS_NUMBER;
+        }
     }
 
     public Collection<Item> getRecommendedItems(User user, int numberOfItems) {
         // TODO: Implement
         return new LinkedList<>();
+    }
+    
+    /**
+     * Finds the k nearest neighbors of user in users (will include user if user is in users).
+     * @param user The user to find the nearest neighbors of
+     * @param users List of users among the nearest neighbors are to be found
+     * @param k Number of nearest neighbors to find
+     * @return Map of nearest neighbors and their similarity with user
+     */
+    private Map<User, Double> findKNN(User user, Collection<User> users, int k) {
+    	Map<User, Double> kNN = new HashMap<User, Double>(); 	// map of users and similarity to user
+        double minSim = 2; 		// minimum similarity of user and its k nearest neighbors
+        for (User u : users) {
+        	double sim = similarity.similarity(user, u, data);
+        	if (kNN.size() < k) {
+        		// Fill up map
+        		kNN.put(u, sim);
+        		if (sim < minSim) {
+        			minSim = sim;
+        		}
+        	} else if(sim > minSim) { 	// add u to users and remove least similar user in users
+        		kNN.put(u, sim);
+        		Iterator<Entry<User, Double>> it = kNN.entrySet().iterator();
+        		double oldMinSim = minSim;
+        		minSim = sim;		// sim not necessarily smallest value, minSim is updated in the while loop
+        		while (it.hasNext()) {
+        			Map.Entry<User, Double> pair = (Entry<User, Double>) it.next();
+        			double value = pair.getValue();
+        			if (value == oldMinSim && kNN.size() > k) {
+        				// remove old neighbor with smallest value of similarity
+        				it.remove();
+        			} else if (value < minSim) {
+        				minSim = value;
+        			}
+        		}
+        	}
+        }
+    	return kNN;
     }
 }

@@ -14,39 +14,40 @@ import static org.junit.Assert.assertEquals;
  */
 public class UserSimilarityTest {
 
-    // Mock data container
-    private final Data<Integer, Integer> data = new Data<Integer, Integer>() {
-        @Override
-        public Map<Integer, Integer> getRatings(Integer user) {
-            Map<Integer, Integer> map = new HashMap<>();
-            if (user == 1) {
-                map.put(1, 1);
-                map.put(2, 2);
-                map.put(3, 3);
-                map.put(4, 4);
-            }
-            if (user == 2) {
-                map.put(2, 2);
-                map.put(3, 3);
-                map.put(4, 4);
-            }
-            if (user == 3) {
-                map.put(1, 4);
-                map.put(2, 3);
-                map.put(3, 2);
-                map.put(4, 1);
-            }
-            return map;
-        }
-
-        @Override
-        public Integer getRating(Integer integer, Integer integer2) {
-            return null;
-        }
-    };
-
     /** Precision for floating number tests. Expected result must be this accurate. */
     private static final double PREC = 0.00000000001;
+
+    // Mock data container
+    private final Data<Integer, Integer> data = new InMemoryData(createData());
+
+    private Map<Integer, Map<Integer, Integer>> createData() {
+        Map<Integer, Map<Integer, Integer>> result = new HashMap<>();
+        Map<Integer, Integer> map;
+
+        map = new HashMap<>();
+        map.put(1, 1);
+        map.put(2, 2);
+        map.put(3, 3);
+        map.put(4, 4);
+        result.put(1, map);
+
+
+        map = new HashMap<>();
+        map.put(2, 2);
+        map.put(3, 3);
+        map.put(4, 4);
+        result.put(2, map);
+
+
+        map = new HashMap<>();
+        map.put(1, 4);
+        map.put(2, 3);
+        map.put(3, 2);
+        map.put(4, 1);
+        result.put(3, map);
+
+        return result;
+    }
 
     private final SimilarityFunction<Integer> similarity = new UserSimilarity();
 
@@ -59,5 +60,6 @@ public class UserSimilarityTest {
         assertEquals(0.666666666667, similarity.similarity(1, 3, data), PREC);
         assertEquals(0.542450802897, similarity.similarity(3, 2, data), PREC);
     }
+
 
 }

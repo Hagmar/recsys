@@ -3,12 +3,17 @@ package recsys.domain;
 import recsys.core.Data;
 
 import java.io.*;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
 public class InMemoryData implements Data<Integer, Integer>, Serializable {
 
+    /** Contains item ratings per user, as Map<User, Map<Item, Rating> */
     private Map<Integer, Map<Integer, Integer>> ratings = new HashMap<>();
+
+    /** Cache for user ratings per item, as Map<Item, Map<User, Rating> */
+    private Map<Integer, Map<Integer, Integer>> itemCache = new HashMap<>();
 
     /**
      * Creates a data container and loads the data from a .csv file.
@@ -17,6 +22,13 @@ public class InMemoryData implements Data<Integer, Integer>, Serializable {
     public InMemoryData(String filepath) {
         parseData(filepath);
         System.out.println("Data contains ratings for " + ratings.size() + " users.");
+    }
+
+    /**
+     * Creates a data container with injected data.
+     */
+    public InMemoryData(Map<Integer, Map<Integer, Integer>> ratings) {
+        this.ratings = ratings;
     }
 
     /**
@@ -35,6 +47,27 @@ public class InMemoryData implements Data<Integer, Integer>, Serializable {
         if (userRatings == null)
             return null;
         return userRatings.get(item);
+    }
+
+    @Override
+    public Collection<Integer> getUsers() {
+        return ratings.keySet();
+    }
+
+    @Override
+    public Map<Integer, Integer> getItemRatings(Integer item) {
+        Map<Integer, Integer> result = itemCache.get(item);
+        if (result == null) {
+            result = new HashMap<>();
+            for (Integer u : getUsers()) {
+                Integer rating = getRating(u, item);
+                if (rating != null) {
+                    result.put(u, rating);
+                }
+            }
+            itemCache.put(item, result);
+        }
+        return result;
     }
 
     public void add(int user, int item, int rating) {

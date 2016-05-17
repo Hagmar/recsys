@@ -1,7 +1,7 @@
 % Simple comparison of recommendations based on user ratings
 
 clear
-cla
+% cla
 clc
 
 load u.data
@@ -16,8 +16,7 @@ a = ini_val*ones(n_movies, n_users);   % Initialise ratings matrix
 for i = 1:n_ratings
    u_index = u(i,1);
    m_index = u(i,2);
-   rating = u(i,3);
-   a(m_index, u_index) = rating;
+   a(m_index, u_index) = u(i,3);
 end
 
 avg_rating = nanmean(a,2);
