@@ -6,9 +6,10 @@ import java.io.*;
 import java.sql.*;
 import java.util.*;
 
-public class SqliteData implements Data<Integer, Integer>, Serializable {
+public class SqliteData implements Data<User, Integer>, Serializable {
 
-    private static final String SELECT_SQL = "SELECT user, movie, rating FROM ratings";
+    private static final String SELECT_SQL = "SELECT user, movie, rating, gender, age FROM ratings " +
+            "JOIN users ON user = users.id";
 
     private PreparedStatement getUserRatingsStmt;
     private PreparedStatement getUserItemRatingStmt;
@@ -43,10 +44,10 @@ public class SqliteData implements Data<Integer, Integer>, Serializable {
     }
 
     @Override
-    public Map<Integer, Integer> getRatings(Integer user) {
+    public Map<Integer, Integer> getRatings(User user) {
         Map<Integer, Integer> result = new HashMap<>();
         try {
-            getUserRatingsStmt.setInt(1, user);
+            getUserRatingsStmt.setInt(1, user.getId());
             ResultSet rs = getUserRatingsStmt.executeQuery();
             while (rs.next()) {
                 result.put(rs.getInt("movie"), rs.getInt("rating"));
@@ -59,9 +60,9 @@ public class SqliteData implements Data<Integer, Integer>, Serializable {
     }
 
     @Override
-    public Integer getRating(Integer user, Integer item) {
+    public Integer getRating(User user, Integer item) {
         try {
-            getUserItemRatingStmt.setInt(1, user);
+            getUserItemRatingStmt.setInt(1, user.getId());
             getUserItemRatingStmt.setInt(2, item);
             ResultSet rs = getUserItemRatingStmt.executeQuery();
             if (rs.next()) {
@@ -75,12 +76,12 @@ public class SqliteData implements Data<Integer, Integer>, Serializable {
     }
 
     @Override
-    public Collection<Integer> getUsers() {
-        Collection<Integer> users = new ArrayList<>();
+    public Collection<User> getUsers() {
+        Collection<User> users = new ArrayList<>();
         try {
             ResultSet rs = getUsersStmt.executeQuery();
             while (rs.next()) {
-                users.add(rs.getInt("user"));
+                users.add(mapUser(rs));
             }
             rs.close();
         } catch (SQLException e) {
@@ -90,17 +91,21 @@ public class SqliteData implements Data<Integer, Integer>, Serializable {
     }
 
     @Override
-    public Map<Integer, Integer> getItemRatings(Integer item) {
-        Map<Integer, Integer> result = new HashMap<>();
+    public Map<User, Integer> getItemRatings(Integer item) {
+        Map<User, Integer> result = new HashMap<>();
         try {
             getItemRatingsStmt.setInt(1, item);
             ResultSet rs = getItemRatingsStmt.executeQuery();
             while (rs.next()) {
-                result.put(rs.getInt("user"), rs.getInt("rating"));
+                result.put(mapUser(rs), rs.getInt("rating"));
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return result;
+    }
+
+    private User mapUser(ResultSet rs) throws SQLException {
+        return new User(rs.getInt("user"), rs.getBoolean("gender"), rs.getInt("age"));
     }
 }

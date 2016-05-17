@@ -10,7 +10,7 @@ public class Main {
     public static void main(String[] args) {
         // Load data container - parse the data files into memory
         Data<User, Integer> data = new InMemoryData("ml-100k/ml-100k/u.data");
-        //Data<Integer, Integer> data = new SqliteData();
+        //Data<User, Integer> data = new SqliteData();
 
         // Instantiate the similarity function to use
         SimilarityFunction<User> similarity = SimilarityFunctionFactory.getFunction();
