@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * @author Anton Jansson.
+ * Decorator for similarity functions that caches already computed similarities.
  */
 class SimilarityCache<User> implements SimilarityFunction<User>, Serializable {
     private final Map<Pair<User, User>, Double> cache = new HashMap<>();
@@ -27,11 +27,6 @@ class SimilarityCache<User> implements SimilarityFunction<User>, Serializable {
         return result;
     }
 
-    /**
-     * Container to ease passing around a tuple of two objects. This object provides a sensible
-     * implementation of equals(), returning true if equals() is true on each of the contained
-     * objects.
-     */
     private static class Pair<F, S> {
         final F first;
         final S second;
