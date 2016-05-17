@@ -20,16 +20,20 @@ public class RecommenderSystem<User, Item> implements Serializable {
     }
 
     public double predictRating(User user, Item item) {
-        Integer rating = data.getRating(user, item);
-        if (rating != null) {
-        	return rating;  // User has already rated this item, no prediction needed
+        Map<Item, Integer> userRatings = data.getRatings(user);
+        if (userRatings != null) {
+            Integer rating = userRatings.get(item);
+            if (rating != null) {
+                return rating;  // User has already rated this item, no prediction needed
+            }
         }
         
         // Find all users who have rated the item
-        Collection<User> hasRated = data.getItemRatings(item).keySet();
+        Map<User, Map<Item, Integer>> otherUsers = data.getUserRatingsByItem(item);
 
         // Find the nearest neighbors among all the users who have rated the item
-        Map<User, Double> kNN = findKNN(user, hasRated, Configuration.NEAREST_NEIGHBORS_NUMBER);
+        Map<User, Double> kNN = findKNN(user, userRatings, otherUsers,
+                Configuration.NEAREST_NEIGHBORS_NUMBER);
         
         // User rates the item according to the [weighted] average of the k nearest neighbors
         float sum = 0, denominator = 0;
@@ -57,15 +61,18 @@ public class RecommenderSystem<User, Item> implements Serializable {
     /**
      * Finds the k nearest neighbors of user in users (will include user if user is in users).
      * @param user The user to find the nearest neighbors of
-     * @param users List of users among the nearest neighbors are to be found
+     * @param userRatings The ratings of the user to find nearest neighbors of
+     * @param otherUsers List of users among the nearest neighbors are to be found, with their ratings.
      * @param k Number of nearest neighbors to find
      * @return Map of nearest neighbors and their similarity with user
      */
-    private Map<User, Double> findKNN(User user, Collection<User> users, int k) {
+    private Map<User, Double> findKNN(User user, Map<Item, Integer> userRatings,
+                                      Map<User, Map<Item, Integer>> otherUsers, int k) {
     	Map<User, Double> kNN = new HashMap<User, Double>(); 	// mapUser of users and similarity to user
         double minSim = 2; 		// minimum similarity of user and its k nearest neighbors
-        for (User u : users) {
-        	double sim = similarity.similarity(user, u, data);
+        for (Entry<User, Map<Item, Integer>> entry : otherUsers.entrySet()) {
+        	User u = entry.getKey();
+            double sim = similarity.similarity(user, u, userRatings, entry.getValue());
         	if (kNN.size() < k) {
         		// Fill up mapUser
         		kNN.put(u, sim);

@@ -11,10 +11,9 @@ public class SqliteData implements Data<User, Integer>, Serializable {
     private static final String SELECT_SQL = "SELECT user, movie, rating, gender, age FROM ratings " +
             "JOIN users ON user = users.id";
 
-    private PreparedStatement getUserRatingsStmt;
-    private PreparedStatement getUserItemRatingStmt;
-    private PreparedStatement getUsersStmt;
-    private PreparedStatement getItemRatingsStmt;
+    private transient PreparedStatement getUserRatingsStmt;
+    private transient PreparedStatement getUserItemRatingStmt;
+    private transient PreparedStatement getUserRatingsByItemStmt;
 
     /**
      * Creates a data container and loads the data from a .csv file.
@@ -36,8 +35,8 @@ public class SqliteData implements Data<User, Integer>, Serializable {
             Connection conn = DriverManager.getConnection(databaseUri);
             getUserRatingsStmt = conn.prepareStatement(SELECT_SQL + " WHERE user = ?");
             getUserItemRatingStmt = conn.prepareStatement(SELECT_SQL + " WHERE user = ? AND movie = ?");
-            getUsersStmt = conn.prepareStatement("SELECT user FROM ratings");
-            getItemRatingsStmt = conn.prepareStatement(SELECT_SQL + " WHERE movie = ?");
+            getUserRatingsByItemStmt = conn.prepareStatement(SELECT_SQL +
+                    " WHERE user IN (SELECT user FROM ratings WHERE movie = ?) ORDER BY user");
         } catch (SQLException e) {
             System.out.println("Could not connect to database. " + e.getMessage());
         }
@@ -76,14 +75,26 @@ public class SqliteData implements Data<User, Integer>, Serializable {
     }
 
     @Override
-    public Map<User, Integer> getItemRatings(Integer item) {
-        Map<User, Integer> result = new HashMap<>();
+    public Map<User, Map<Integer, Integer>> getUserRatingsByItem(Integer item) {
+        Map<User, Map<Integer, Integer>> result = new HashMap<>();
         try {
-            getItemRatingsStmt.setInt(1, item);
-            ResultSet rs = getItemRatingsStmt.executeQuery();
+            getUserRatingsByItemStmt.setInt(1, item);
+            ResultSet rs = getUserRatingsByItemStmt.executeQuery();
+            User currentUser = null;
+            Map<Integer, Integer> ratings = null;
+            int currentUserId = -1;
             while (rs.next()) {
-                result.put(mapUser(rs), rs.getInt("rating"));
+                if (currentUserId != rs.getInt("user")) {
+                    if (currentUser != null) {
+                        result.put(currentUser, ratings);
+                    }
+                    currentUser = mapUser(rs);
+                    currentUserId = currentUser.getId();
+                    ratings = new HashMap<>();
+                }
+                ratings.put(rs.getInt("movie"), rs.getInt("rating"));
             }
+            result.put(currentUser, ratings);
         } catch (SQLException e) {
             e.printStackTrace();
         }

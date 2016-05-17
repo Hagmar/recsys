@@ -1,6 +1,5 @@
 package recsys.core;
 
-import java.util.Collection;
 import java.util.Map;
 
 /**
@@ -29,5 +28,5 @@ public interface Data<User, Item> {
      * @param item The item to get ratings for.
      * @return A mapUser of user as key and the user's rating of specified item as value.
      */
-    Map<User, Integer> getItemRatings(Item item);
+    Map<User, Map<Item, Integer>> getUserRatingsByItem(Item item);
 }

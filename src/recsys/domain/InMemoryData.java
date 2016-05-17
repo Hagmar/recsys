@@ -2,8 +2,10 @@ package recsys.domain;
 
 import recsys.core.Data;
 
-import java.io.*;
-import java.util.Collection;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -13,7 +15,7 @@ public class InMemoryData implements Data<User, Integer>, Serializable {
     private Map<User, Map<Integer, Integer>> ratings = new HashMap<>();
 
     /** Cache for user ratings per item, as Map<Item, Map<User, Rating> */
-    private Map<Integer, Map<User, Integer>> itemCache = new HashMap<>();
+    private Map<Integer, Map<User, Map<Integer, Integer>>> itemCache = new HashMap<>();
 
     /**
      * Creates a data container and loads the data from a .csv file.
@@ -50,14 +52,14 @@ public class InMemoryData implements Data<User, Integer>, Serializable {
     }
 
     @Override
-    public Map<User, Integer> getItemRatings(Integer item) {
-        Map<User, Integer> result = itemCache.get(item);
+    public Map<User, Map<Integer, Integer>> getUserRatingsByItem(Integer item) {
+        Map<User, Map<Integer, Integer>> result = itemCache.get(item);
         if (result == null) {
             result = new HashMap<>();
-            for (User u : ratings.keySet()) {
-                Integer rating = getRating(u, item);
+            for (Map.Entry<User, Map<Integer, Integer>> entry : ratings.entrySet()) {
+                Integer rating = getRating(entry.getKey(), item);
                 if (rating != null) {
-                    result.put(u, rating);
+                    result.put(entry.getKey(), entry.getValue());
                 }
             }
             itemCache.put(item, result);

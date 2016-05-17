@@ -8,7 +8,7 @@ import java.util.Objects;
 /**
  * Decorator for similarity functions that caches already computed similarities.
  */
-class SimilarityCache<User> implements SimilarityFunction<User>, Serializable {
+class SimilarityCache<User> extends BaseSimilarity<User> {
     private final Map<Pair<User, User>, Double> cache = new HashMap<>();
     private final SimilarityFunction<User> similarity;
 
@@ -17,11 +17,11 @@ class SimilarityCache<User> implements SimilarityFunction<User>, Serializable {
     }
 
     @Override
-    public double similarity(User u1, User u2, Data<User, ?> data) {
+    public <Item> double similarity(User u1, User u2, Map<Item, Integer> u1Ratings, Map<Item, Integer> u2Ratings) {
         Pair<User, User> pair = new Pair<>(u1, u2);
         Double result = cache.get(pair);
         if (result == null) {
-            result = similarity.similarity(u1, u2, data);
+            result = similarity.similarity(u1, u2, u1Ratings, u2Ratings);
             cache.put(pair, result);
         }
         return result;

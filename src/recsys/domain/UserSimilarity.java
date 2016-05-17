@@ -1,7 +1,6 @@
 package recsys.domain;
 
-import recsys.core.Data;
-import recsys.core.SimilarityFunction;
+import recsys.core.BaseSimilarity;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -9,12 +8,10 @@ import java.util.Map;
 /**
  * Computes the cosine similarity between two users.
  */
-public class UserSimilarity implements SimilarityFunction<User>, Serializable {
-    @Override
-    public double similarity(User user1, User user2, Data<User, ?> data) {
-        Map<?, Integer> ratings1 = data.getRatings(user1);
-        Map<?, Integer> ratings2 = data.getRatings(user2);
+public class UserSimilarity extends BaseSimilarity<User> {
 
+    @Override
+    public <Item> double similarity(User u1, User u2, Map<Item, Integer> ratings1, Map<Item, Integer> ratings2) {
         return cosineSimilarity(ratings1, ratings2);
     }
 
