@@ -12,7 +12,7 @@ public interface Data<User, Item> {
     /**
      * Returns ratings for all items that the user has rated.
      * @param user The user who has rated the items.
-     * @return A map indexed with item and key as rating.
+     * @return A mapUser indexed with item and key as rating.
      */
     Map<Item, Integer> getRatings(User user);
 
@@ -33,7 +33,7 @@ public interface Data<User, Item> {
     /**
      * Returns ratings from all users who have rated a specific item.
      * @param item The item to get ratings for.
-     * @return A map of user as key and the user's rating of specified item as value.
+     * @return A mapUser of user as key and the user's rating of specified item as value.
      */
     Map<User, Integer> getItemRatings(Item item);
 }

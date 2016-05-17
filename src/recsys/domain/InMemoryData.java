@@ -7,13 +7,13 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-public class InMemoryData implements Data<Integer, Integer>, Serializable {
+public class InMemoryData implements Data<User, Integer>, Serializable {
 
     /** Contains item ratings per user, as Map<User, Map<Item, Rating> */
-    private Map<Integer, Map<Integer, Integer>> ratings = new HashMap<>();
+    private Map<User, Map<Integer, Integer>> ratings = new HashMap<>();
 
     /** Cache for user ratings per item, as Map<Item, Map<User, Rating> */
-    private Map<Integer, Map<Integer, Integer>> itemCache = new HashMap<>();
+    private Map<Integer, Map<User, Integer>> itemCache = new HashMap<>();
 
     /**
      * Creates a data container and loads the data from a .csv file.
@@ -27,7 +27,7 @@ public class InMemoryData implements Data<Integer, Integer>, Serializable {
     /**
      * Creates a data container with injected data.
      */
-    public InMemoryData(Map<Integer, Map<Integer, Integer>> ratings) {
+    public InMemoryData(Map<User, Map<Integer, Integer>> ratings) {
         this.ratings = ratings;
     }
 
@@ -37,12 +37,12 @@ public class InMemoryData implements Data<Integer, Integer>, Serializable {
     public InMemoryData() {}
 
     @Override
-    public Map<Integer, Integer> getRatings(Integer user) {
+    public Map<Integer, Integer> getRatings(User user) {
         return ratings.get(user);
     }
 
     @Override
-    public Integer getRating(Integer user, Integer item) {
+    public Integer getRating(User user, Integer item) {
         Map<Integer, Integer> userRatings = getRatings(user);
         if (userRatings == null)
             return null;
@@ -50,16 +50,16 @@ public class InMemoryData implements Data<Integer, Integer>, Serializable {
     }
 
     @Override
-    public Collection<Integer> getUsers() {
+    public Collection<User> getUsers() {
         return ratings.keySet();
     }
 
     @Override
-    public Map<Integer, Integer> getItemRatings(Integer item) {
-        Map<Integer, Integer> result = itemCache.get(item);
+    public Map<User, Integer> getItemRatings(Integer item) {
+        Map<User, Integer> result = itemCache.get(item);
         if (result == null) {
             result = new HashMap<>();
-            for (Integer u : getUsers()) {
+            for (User u : getUsers()) {
                 Integer rating = getRating(u, item);
                 if (rating != null) {
                     result.put(u, rating);
@@ -70,7 +70,7 @@ public class InMemoryData implements Data<Integer, Integer>, Serializable {
         return result;
     }
 
-    public void add(int user, int item, int rating) {
+    public void add(User user, int item, int rating) {
         Map<Integer, Integer> userRatings = ratings.get(user);
         if (userRatings == null) {
             userRatings = new HashMap<>();
@@ -85,7 +85,8 @@ public class InMemoryData implements Data<Integer, Integer>, Serializable {
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] columns = line.split("\\W");
-                add(Integer.parseInt(columns[0]), Integer.parseInt(columns[1]), Integer.parseInt(columns[2]));
+                User user = new User(Integer.parseInt(columns[0]));
+                add(user, Integer.parseInt(columns[1]), Integer.parseInt(columns[2]));
             }
         } catch (IOException e) {
             e.printStackTrace();

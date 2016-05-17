@@ -3,7 +3,7 @@ package recsys.domain;
 import recsys.core.SimilarityFunction;
 
 public class SimilarityFunctionFactory {
-    public static SimilarityFunction<Integer> getFunction() {
+    public static SimilarityFunction<User> getFunction() {
         return new UserSimilarity();
     }
 }

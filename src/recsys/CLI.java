@@ -1,6 +1,7 @@
 package recsys;
 
 import recsys.core.RecommenderSystem;
+import recsys.domain.User;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -22,9 +23,9 @@ public class CLI {
     private static final String PREDICT_USAGE = "predict <user-id> <item-id>";
     private static final String RECOMMEND_USAGE = "recommend <user-id> <limit-results>";
 
-    private RecommenderSystem<Integer, Integer> system;
+    private RecommenderSystem<User, Integer> system;
 
-    public CLI(RecommenderSystem<Integer, Integer> system) {
+    public CLI(RecommenderSystem<User, Integer> system) {
         this.system = system;
     }
 
@@ -55,7 +56,7 @@ public class CLI {
                 System.out.println(RECOMMEND_USAGE);
             } else if (command.startsWith("predict")) {
                 try {
-                    int user = Integer.parseInt(args.get(0));
+                    User user = new User(Integer.parseInt(args.get(0)));
                     int item = Integer.parseInt(args.get(1));
                     double result = system.predictRating(user, item);
                     System.out.println("Predicted rating: " + result);
@@ -64,7 +65,7 @@ public class CLI {
                 }
             } else if (command.startsWith("recommend")) {
                 try {
-                    int user = Integer.parseInt(args.get(0));
+                    User user = new User(Integer.parseInt(args.get(0)));
                     int limitItems = Integer.parseInt(args.get(1));
                     Collection<Integer> result = system.getRecommendedItems(user, limitItems);
                     System.out.println("Recommended items (" + result.size() + "):");

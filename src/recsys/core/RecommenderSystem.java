@@ -62,12 +62,12 @@ public class RecommenderSystem<User, Item> implements Serializable {
      * @return Map of nearest neighbors and their similarity with user
      */
     private Map<User, Double> findKNN(User user, Collection<User> users, int k) {
-    	Map<User, Double> kNN = new HashMap<User, Double>(); 	// map of users and similarity to user
+    	Map<User, Double> kNN = new HashMap<User, Double>(); 	// mapUser of users and similarity to user
         double minSim = 2; 		// minimum similarity of user and its k nearest neighbors
         for (User u : users) {
         	double sim = similarity.similarity(user, u, data);
         	if (kNN.size() < k) {
-        		// Fill up map
+        		// Fill up mapUser
         		kNN.put(u, sim);
         		if (sim < minSim) {
         			minSim = sim;

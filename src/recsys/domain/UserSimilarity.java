@@ -9,9 +9,9 @@ import java.util.Map;
 /**
  * Computes the cosine similarity between two users.
  */
-public class UserSimilarity implements SimilarityFunction<Integer>, Serializable {
+public class UserSimilarity implements SimilarityFunction<User>, Serializable {
     @Override
-    public double similarity(Integer user1, Integer user2, Data<Integer, ?> data) {
+    public double similarity(User user1, User user2, Data<User, ?> data) {
         Map<?, Integer> ratings1 = data.getRatings(user1);
         Map<?, Integer> ratings2 = data.getRatings(user2);
 
