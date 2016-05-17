@@ -25,12 +25,6 @@ public interface Data<User, Item> {
     Integer getRating(User user, Item item);
 
     /**
-     * Returns all users in the dataset.
-     * @return A collection of users.
-     */
-    Collection<User> getUsers();
-
-    /**
      * Returns ratings from all users who have rated a specific item.
      * @param item The item to get ratings for.
      * @return A mapUser of user as key and the user's rating of specified item as value.

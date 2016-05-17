@@ -50,16 +50,11 @@ public class InMemoryData implements Data<User, Integer>, Serializable {
     }
 
     @Override
-    public Collection<User> getUsers() {
-        return ratings.keySet();
-    }
-
-    @Override
     public Map<User, Integer> getItemRatings(Integer item) {
         Map<User, Integer> result = itemCache.get(item);
         if (result == null) {
             result = new HashMap<>();
-            for (User u : getUsers()) {
+            for (User u : ratings.keySet()) {
                 Integer rating = getRating(u, item);
                 if (rating != null) {
                     result.put(u, rating);

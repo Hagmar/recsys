@@ -76,21 +76,6 @@ public class SqliteData implements Data<User, Integer>, Serializable {
     }
 
     @Override
-    public Collection<User> getUsers() {
-        Collection<User> users = new ArrayList<>();
-        try {
-            ResultSet rs = getUsersStmt.executeQuery();
-            while (rs.next()) {
-                users.add(mapUser(rs));
-            }
-            rs.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return users;
-    }
-
-    @Override
     public Map<User, Integer> getItemRatings(Integer item) {
         Map<User, Integer> result = new HashMap<>();
         try {
