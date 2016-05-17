@@ -18,6 +18,8 @@ def main():
 
     if args.mode == '100K':
         generate_database_100K(args.dataset, args.database)
+    elif args.mode == '1M':
+        generate_database_1M(args.dataset, args.database)
     else:
         print('Other dataset formats not implemented yet. Stick to 100K')
 
@@ -48,16 +50,16 @@ def generate_database_100K(dataset, database):
 
     create_tables(c)
 
-    occupation_map = parse_occupation_data(dataset, c)
-    parse_genre_data(dataset, c)
-    parse_movie_data(dataset, c)
-    parse_user_data(dataset, c, occupation_map)
-    parse_rating_data(dataset, c)
+    occupation_map = parse_occupation_data_100K(dataset, c)
+    parse_genre_data_100K(dataset, c)
+    parse_movie_data_100K(dataset, c)
+    parse_user_data_100K(dataset, c, occupation_map)
+    parse_rating_data_100K(dataset, c)
 
     conn.commit()
     conn.close()
 
-def parse_occupation_data(dataset, c):
+def parse_occupation_data_100K(dataset, c):
     occupation_map = {}
     insert_occupation_query = 'INSERT INTO occupations(occupation) VALUES (?)'
     with open(os.path.join(dataset, 'u.occupation'), 'r') as occFile:
@@ -69,7 +71,7 @@ def parse_occupation_data(dataset, c):
 
     return occupation_map
 
-def parse_genre_data(dataset, c):
+def parse_genre_data_100K(dataset, c):
     insert_genre_query = 'INSERT INTO genres(id, name) VALUES (?, ?)'
     with open(os.path.join(dataset, 'u.genre'), 'r') as genreFile:
         for line in genreFile:
@@ -77,7 +79,7 @@ def parse_genre_data(dataset, c):
                 [genre, gid] = line.rstrip().split('|')
                 c.execute(insert_genre_query, (gid, genre))
 
-def parse_movie_data(dataset, c):
+def parse_movie_data_100K(dataset, c):
     insert_movie_query = 'INSERT INTO movies(id, title, releasedate) VALUES (?, ?, ?)'
     insert_moviegenre_query = 'INSERT INTO moviegenres(movie, genre) VALUES (?, ?)'
     with open(os.path.join(dataset, 'u.item'), 'r') as movieFile:
@@ -94,7 +96,7 @@ def parse_movie_data(dataset, c):
                     if isGenre == '1':
                         c.execute(insert_moviegenre_query, (movie_id, genre))
 
-def parse_user_data(dataset, c, occupation_map):
+def parse_user_data_100K(dataset, c, occupation_map):
     insert_user_query = 'INSERT INTO users(id, age, gender, occupation, zipcode) VALUES (?, ?, ?, ?, ?)'
     with open(os.path.join(dataset, 'u.user'), 'r') as userFile:
         for line in userFile:
@@ -108,12 +110,101 @@ def parse_user_data(dataset, c, occupation_map):
                 c.execute(insert_user_query,
                         (user_id, age, gender, occupation, zipcode))
 
-def parse_rating_data(dataset, c):
+def parse_rating_data_100K(dataset, c):
     insert_rating_query = 'INSERT INTO ratings(user, movie, rating, timestamp) VALUES (?, ?, ?, ?)'
     with open(os.path.join(dataset, 'u.data'), 'r') as ratingFile:
         for line in ratingFile:
             if line.rstrip():
                 splitline = line.rstrip().split('\t')
+                user = splitline[0]
+                movie = splitline[1]
+                rating = splitline[2]
+                tstamp = splitline[3]
+                c.execute(insert_rating_query, (user, movie, rating, tstamp))
+
+def generate_database_1M(dataset, database):
+    if os.path.isfile(database):
+        os.remove(database)
+
+    conn = sqlite3.connect(database)
+    conn.text_factory = str
+    c = conn.cursor()
+
+    create_tables(c)
+
+    create_occupation_table_1M(c)
+    genre_map = make_genre_map(c)
+    parse_movie_data_1M(dataset, genre_map, c)
+    parse_user_data_1M(dataset, c)
+    parse_rating_data_1M(dataset, c)
+
+    conn.commit()
+    conn.close()
+
+def create_occupation_table_1M(c):
+    insert_occupation_query = 'INSERT INTO occupations(id, occupation) VALUES (?, ?)'
+    occupations = ['other', 'academic/educator', 'artist', 'clerical/admin',
+            'college/grad student', 'customer service', 'doctor/health care',
+            'executive/managerial', 'farmer', 'homemaker', 'K-12 student',
+            'lawyer', 'programmer', 'retured', 'sales/marketing',
+            'scientist', 'self-employed', 'technician/engineer',
+            'tradesman/craftsman', 'unemployed', 'writer']
+    for occ_id, occupation in enumerate(occupations):
+        c.execute(insert_occupation_query, (occ_id, occupation))
+
+def make_genre_map(c):
+    genre_map = {}
+    genres = ["Action", "Adventure", "Animation", "Children's", "Comedy",
+            "Crime", "Documentary", "Drama", "Fantasy", "Film-Noir", "Horror",
+            "Musical", "Mystery", "Romance", "Sci-Fi", "Thriller", "War",
+            "Western"]
+    insert_genre_query = 'INSERT INTO genres(id, name) VALUES (?, ?)'
+    for (gid, genre) in enumerate(genres):
+        genre_map[genre] = gid
+        c.execute(insert_genre_query, (gid, genre))
+
+    return genre_map
+
+def parse_movie_data_1M(dataset, genre_map, c):
+    insert_movie_query = 'INSERT INTO movies(id, title, releasedate) VALUES (?, ?, ?)'
+    insert_moviegenre_query = 'INSERT INTO moviegenres(movie, genre) VALUES (?, ?)'
+    with open(os.path.join(dataset, 'movies.dat'), 'r') as movieFile:
+        for line in movieFile:
+            if line.rstrip():
+                splitline = line.rstrip().split('::')
+                movie_id = splitline[0]
+                title = splitline[1]
+                releasedate = title[-5:-1]
+                c.execute(insert_movie_query, (movie_id, title, releasedate))
+
+                genres = splitline[2]
+                for genre in genres.split('|'):
+                    try:
+                        genre_id = genre_map[genre]
+                        c.execute(insert_moviegenre_query, (movie_id, genre))
+                    except:
+                        print("Error, invalid genre \"%s\" for movie %s" % (genre, movie_id))
+
+def parse_user_data_1M(dataset, c):
+    insert_user_query = 'INSERT INTO users(id, age, gender, occupation, zipcode) VALUES (?, ?, ?, ?, ?)'
+    with open(os.path.join(dataset, 'users.dat'), 'r') as userFile:
+        for line in userFile:
+            if line.rstrip():
+                splitline = line.rstrip().split('::')
+                user_id = splitline[0]
+                gender = splitline[1] == 'F'
+                age = splitline[2]
+                occupation = splitline[3]
+                zipcode = splitline[4]
+                c.execute(insert_user_query,
+                        (user_id, age, gender, occupation, zipcode))
+
+def parse_rating_data_1M(dataset, c):
+    insert_rating_query = 'INSERT INTO ratings(user, movie, rating, timestamp) VALUES (?, ?, ?, ?)'
+    with open(os.path.join(dataset, 'ratings.dat'), 'r') as ratingFile:
+        for line in ratingFile:
+            if line.rstrip():
+                splitline = line.rstrip().split('::')
                 user = splitline[0]
                 movie = splitline[1]
                 rating = splitline[2]
