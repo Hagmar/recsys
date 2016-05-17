@@ -12,9 +12,11 @@ import java.util.Map;
 public class InMemoryData implements Data<User, Integer>, Serializable {
 
     /** Contains item ratings per user, as Map<User, Map<Item, Rating> */
-    private Map<User, Map<Integer, Integer>> ratings = new HashMap<>();
+    private Map<User, Map<Integer, Integer>> userRatings = new HashMap<>();
+    /** Contains item ratings per item, as Map<Item, Map<User, Rating> */
+    private Map<Integer, Map<User, Integer>> itemRatings = new HashMap<>();
 
-    /** Cache for user ratings per item, as Map<Item, Map<User, Rating> */
+    /** Cache for user userRatings per item, as Map<Item, Map<User, Rating> */
     private Map<Integer, Map<User, Map<Integer, Integer>>> itemCache = new HashMap<>();
 
     /**
@@ -23,14 +25,14 @@ public class InMemoryData implements Data<User, Integer>, Serializable {
      */
     public InMemoryData(String filepath) {
         parseData(filepath);
-        System.out.println("Data contains ratings for " + ratings.size() + " users.");
+        System.out.println("Data contains userRatings for " + userRatings.size() + " users.");
     }
 
     /**
      * Creates a data container with injected data.
      */
     public InMemoryData(Map<User, Map<Integer, Integer>> ratings) {
-        this.ratings = ratings;
+        this.userRatings = ratings;
     }
 
     /**
@@ -40,7 +42,7 @@ public class InMemoryData implements Data<User, Integer>, Serializable {
 
     @Override
     public Map<Integer, Integer> getRatings(User user) {
-        return ratings.get(user);
+        return userRatings.get(user);
     }
 
     @Override
@@ -56,10 +58,10 @@ public class InMemoryData implements Data<User, Integer>, Serializable {
         Map<User, Map<Integer, Integer>> result = itemCache.get(item);
         if (result == null) {
             result = new HashMap<>();
-            for (Map.Entry<User, Map<Integer, Integer>> entry : ratings.entrySet()) {
-                Integer rating = getRating(entry.getKey(), item);
-                if (rating != null) {
-                    result.put(entry.getKey(), entry.getValue());
+            Map<User, Integer> users = itemRatings.get(item);
+            if (users != null) {
+                for (User user : users.keySet()) {
+                    result.put(user, userRatings.get(user));
                 }
             }
             itemCache.put(item, result);
@@ -68,12 +70,19 @@ public class InMemoryData implements Data<User, Integer>, Serializable {
     }
 
     public void add(User user, int item, int rating) {
-        Map<Integer, Integer> userRatings = ratings.get(user);
-        if (userRatings == null) {
-            userRatings = new HashMap<>();
-            ratings.put(user, userRatings);
+        Map<Integer, Integer> uRatings = userRatings.get(user);
+        if (uRatings == null) {
+            uRatings = new HashMap<>();
+            userRatings.put(user, uRatings);
         }
-        userRatings.put(item, rating);
+        uRatings.put(item, rating);
+
+        Map<User, Integer> iRatings = itemRatings.get(item);
+        if (iRatings == null) {
+            iRatings = new HashMap<>();
+            itemRatings.put(item, iRatings);
+        }
+        iRatings.put(user, rating);
     }
 
     private void parseData(String filepath) {
