@@ -13,4 +13,16 @@ class Configuration {
      * of the similar users' ratings.
      */
     public static final boolean WEIGHTED_AVERAGE = true;
+    /**
+     * Sets the smoothing mode.
+     */
+    public static final Smoothing SMOOTHING = Smoothing.NONE;
+
+
+    public enum Smoothing {
+        /** Smoothing disabled */
+        NONE,
+        /** One user with all ratings set to 3 is added. */
+        ALL_3
+    }
 }

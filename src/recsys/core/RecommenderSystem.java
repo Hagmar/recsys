@@ -26,10 +26,16 @@ public class RecommenderSystem<User, Item> implements Serializable {
             if (rating != null) {
                 return rating;  // User has already rated this item, no prediction needed
             }
+        } else {
+            userRatings = new HashMap<>();
         }
         
         // Find all users who have rated the item
         Map<User, Map<Item, Integer>> otherUsers = data.getUserRatingsByItem(item);
+
+        if (Configuration.SMOOTHING != Configuration.Smoothing.NONE) {
+            otherUsers.put(null, getSmoothingRatings(userRatings.keySet(), item));
+        }
 
         // Find the nearest neighbors among all the users who have rated the item
         Map<User, Double> kNN = findKNN(user, userRatings, otherUsers,
@@ -38,11 +44,12 @@ public class RecommenderSystem<User, Item> implements Serializable {
         // User rates the item according to the [weighted] average of the k nearest neighbors
         float sum = 0, denominator = 0;
         for (Entry<User, Double> pair : kNN.entrySet()) {
+            int rating = otherUsers.get(pair.getKey()).get(item);
             if (Configuration.WEIGHTED_AVERAGE) {
                 denominator += pair.getValue();
-                sum += pair.getValue() * data.getRating(pair.getKey(), item);
+                sum += pair.getValue() * rating;
             } else {
-                sum += data.getRating(pair.getKey(), item);
+                sum += rating;
             }
         }
 
@@ -97,5 +104,29 @@ public class RecommenderSystem<User, Item> implements Serializable {
         	}
         }
     	return kNN;
+    }
+
+    /**
+     * Return ratings used for smoothing.
+     * @param userRatedItems Items to get smooth ratings for (items rated by the user to predict
+     *                       for is enough sincethese are the only ratings compared in similarity
+     *                       function).
+     * @param queryItem The item which rating should be predicted.
+     * @return Ratings for the items.
+     */
+    private Map<Item, Integer> getSmoothingRatings(Collection<Item> userRatedItems, Item queryItem) {
+        Collection<Item> items = new ArrayList<>(userRatedItems.size() + 1);
+        items.addAll(userRatedItems);
+        items.add(queryItem);
+
+        Map<Item, Integer> smoothingRatings = new HashMap<>();
+        for (Item item : items) {
+            switch (Configuration.SMOOTHING) {
+                case ALL_3:
+                    smoothingRatings.put(item, 3);
+                    break;
+            }
+        }
+        return smoothingRatings;
     }
 }
