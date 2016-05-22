@@ -17,6 +17,9 @@ Available commands:
 ### Cross-validation using Weka libraries
 Run `weka/TestRunner` to perform a k-fold cross validation.
 
+### Configuration
+Change how the recommender system should behave by modifying the constants in the class `core/Configuration`. The properties let you enable/disable features and tune parameters for the prediction.
+
 ## Development setup
 ### Libraries
 Make sure the `*.jar` files in the `libs` folder are included as libraries in your project. Add those manually in your IDE.
