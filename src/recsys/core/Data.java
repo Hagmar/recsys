@@ -1,5 +1,6 @@
 package recsys.core;
 
+import java.util.Collection;
 import java.util.Map;
 
 /**
@@ -13,7 +14,7 @@ public interface Data<User, Item> {
      * @param user The user who has rated the items.
      * @return A mapUser indexed with item and key as rating.
      */
-    Map<Item, Integer> getRatings(User user);
+    Map<Item, Double> getRatings(User user);
 
     /**
      * Returns the rating by a user for an item.
@@ -21,12 +22,19 @@ public interface Data<User, Item> {
      * @param item The item that has been rated.
      * @return The rating or null if no rating exists.
      */
-    Integer getRating(User user, Item item);
+    Double getRating(User user, Item item);
 
     /**
      * Returns ratings from all users who have rated a specific item.
      * @param item The item to get ratings for.
-     * @return A mapUser of user as key and the user's rating of specified item as value.
+     * @return A map of user as key and the user's rating of specified item as value.
      */
-    Map<User, Map<Item, Integer>> getUserRatingsByItem(Item item);
+    Map<User, Map<Item, Double>> getUserRatingsByItem(Item item);
+
+    /**
+     * Returns the average rating for each item in the parameter list.
+     * @param items The items to get average rating for.
+     * @return A map of items with their average rating.
+     */
+    Map<Item, Double> getAverageRatings(Collection<Item> items);
 }

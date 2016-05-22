@@ -20,9 +20,9 @@ public class RecommenderSystem<User, Item> implements Serializable {
     }
 
     public double predictRating(User user, Item item) {
-        Map<Item, Integer> userRatings = data.getRatings(user);
+        Map<Item, Double> userRatings = data.getRatings(user);
         if (userRatings != null) {
-            Integer rating = userRatings.get(item);
+            Double rating = userRatings.get(item);
             if (rating != null) {
                 return rating;  // User has already rated this item, no prediction needed
             }
@@ -31,7 +31,7 @@ public class RecommenderSystem<User, Item> implements Serializable {
         }
         
         // Find all users who have rated the item
-        Map<User, Map<Item, Integer>> otherUsers = data.getUserRatingsByItem(item);
+        Map<User, Map<Item, Double>> otherUsers = data.getUserRatingsByItem(item);
 
         if (Configuration.SMOOTHING != Configuration.Smoothing.NONE) {
             otherUsers.put(null, getSmoothingRatings(userRatings.keySet(), item));
@@ -44,7 +44,7 @@ public class RecommenderSystem<User, Item> implements Serializable {
         // User rates the item according to the [weighted] average of the k nearest neighbors
         float sum = 0, denominator = 0;
         for (Entry<User, Double> pair : kNN.entrySet()) {
-            int rating = otherUsers.get(pair.getKey()).get(item);
+            double rating = otherUsers.get(pair.getKey()).get(item);
             if (Configuration.WEIGHTED_AVERAGE) {
                 denominator += pair.getValue();
                 sum += pair.getValue() * rating;
@@ -73,11 +73,11 @@ public class RecommenderSystem<User, Item> implements Serializable {
      * @param k Number of nearest neighbors to find
      * @return Map of nearest neighbors and their similarity with user
      */
-    private Map<User, Double> findKNN(User user, Map<Item, Integer> userRatings,
-                                      Map<User, Map<Item, Integer>> otherUsers, int k) {
+    private Map<User, Double> findKNN(User user, Map<Item, Double> userRatings,
+                                      Map<User, Map<Item, Double>> otherUsers, int k) {
     	Map<User, Double> kNN = new HashMap<User, Double>(); 	// mapUser of users and similarity to user
         double minSim = 2; 		// minimum similarity of user and its k nearest neighbors
-        for (Entry<User, Map<Item, Integer>> entry : otherUsers.entrySet()) {
+        for (Entry<User, Map<Item, Double>> entry : otherUsers.entrySet()) {
         	User u = entry.getKey();
             double sim = similarity.similarity(user, u, userRatings, entry.getValue());
         	if (kNN.size() < k) {
@@ -114,16 +114,19 @@ public class RecommenderSystem<User, Item> implements Serializable {
      * @param queryItem The item which rating should be predicted.
      * @return Ratings for the items.
      */
-    private Map<Item, Integer> getSmoothingRatings(Collection<Item> userRatedItems, Item queryItem) {
+    private Map<Item, Double> getSmoothingRatings(Collection<Item> userRatedItems, Item queryItem) {
         Collection<Item> items = new ArrayList<>(userRatedItems.size() + 1);
         items.addAll(userRatedItems);
         items.add(queryItem);
 
-        Map<Item, Integer> smoothingRatings = new HashMap<>();
+        if (Configuration.SMOOTHING == Configuration.Smoothing.ITEM_AVERAGE)
+            return data.getAverageRatings(items);
+
+        Map<Item, Double> smoothingRatings = new HashMap<>();
         for (Item item : items) {
             switch (Configuration.SMOOTHING) {
                 case ALL_3:
-                    smoothingRatings.put(item, 3);
+                    smoothingRatings.put(item, 3.0);
                     break;
             }
         }

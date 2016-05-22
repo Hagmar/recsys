@@ -1,6 +1,5 @@
 package recsys.core;
 
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -17,7 +16,7 @@ class SimilarityCache<User> extends BaseSimilarity<User> {
     }
 
     @Override
-    public <Item> double similarity(User u1, User u2, Map<Item, Integer> u1Ratings, Map<Item, Integer> u2Ratings) {
+    public <Item> double similarity(User u1, User u2, Map<Item, Double> u1Ratings, Map<Item, Double> u2Ratings) {
         Pair<User, User> pair = new Pair<>(u1, u2);
         Double result = cache.get(pair);
         if (result == null) {

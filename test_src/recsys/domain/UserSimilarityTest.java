@@ -25,30 +25,30 @@ public class UserSimilarityTest {
     // Mock data container
     private final Data<User, Integer> data = new InMemoryData(createData());
 
-    private Map<User, Map<Integer, Integer>> createData() {
-        Map<User, Map<Integer, Integer>> result = new HashMap<>();
-        Map<Integer, Integer> map;
+    private Map<User, Map<Integer, Double>> createData() {
+        Map<User, Map<Integer, Double>> result = new HashMap<>();
+        Map<Integer, Double> map;
 
         map = new HashMap<>();
-        map.put(1, 1);
-        map.put(2, 2);
-        map.put(3, 3);
-        map.put(4, 4);
+        map.put(1, 1d);
+        map.put(2, 2d);
+        map.put(3, 3d);
+        map.put(4, 4d);
         result.put(u1, map);
 
 
         map = new HashMap<>();
-        map.put(2, 2);
-        map.put(3, 3);
-        map.put(4, 4);
+        map.put(2, 2d);
+        map.put(3, 3d);
+        map.put(4, 4d);
         result.put(u2, map);
 
 
         map = new HashMap<>();
-        map.put(1, 4);
-        map.put(2, 3);
-        map.put(3, 2);
-        map.put(4, 1);
+        map.put(1, 4d);
+        map.put(2, 3d);
+        map.put(3, 2d);
+        map.put(4, 1d);
         result.put(u3, map);
 
         return result;

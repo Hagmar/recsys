@@ -3,7 +3,7 @@ package recsys.core;
 /**
  * Constants for tweaking the recommender system.
  */
-class Configuration {
+public class Configuration {
     /**
      * The number of nearest neighbors (k) to use for prediction.
      */
@@ -16,13 +16,19 @@ class Configuration {
     /**
      * Sets the smoothing mode.
      */
-    public static final Smoothing SMOOTHING = Smoothing.NONE;
+    public static final Smoothing SMOOTHING = Smoothing.ITEM_AVERAGE;
+    /**
+     * The default rating average for items that have no ratings (probably 0 or 3).
+     */
+    public static final double DEFAULT_AVERAGE = 3;
 
 
     public enum Smoothing {
-        /** Smoothing disabled */
+        /** Smoothing disabled. */
         NONE,
-        /** One user with all ratings set to 3 is added. */
-        ALL_3
+        /** One user that has rated all items with a 3. */
+        ALL_3,
+        /** One user that has rated all items with each item's average rating. */
+        ITEM_AVERAGE
     }
 }

@@ -1,23 +1,29 @@
 package recsys.domain;
 
+import recsys.core.Configuration;
 import recsys.core.Data;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
 public class InMemoryData implements Data<User, Integer>, Serializable {
 
     /** Contains item ratings per user, as Map<User, Map<Item, Rating> */
-    private Map<User, Map<Integer, Integer>> userRatings = new HashMap<>();
+    private Map<User, Map<Integer, Double>> userRatings = new HashMap<>();
     /** Contains item ratings per item, as Map<Item, Map<User, Rating> */
-    private Map<Integer, Map<User, Integer>> itemRatings = new HashMap<>();
+    private Map<Integer, Map<User, Double>> itemRatings = new HashMap<>();
+    /** Sum of all ratings. Used for average. */
+    private Map<Integer, Double> itemRatingSum = new HashMap<>();
+    /** Number of ratings. Used for average. */
+    private Map<Integer, Integer> itemRatingCount = new HashMap<>();
 
     /** Cache for user userRatings per item, as Map<Item, Map<User, Rating> */
-    private Map<Integer, Map<User, Map<Integer, Integer>>> itemCache = new HashMap<>();
+    private Map<Integer, Map<User, Map<Integer, Double>>> itemCache = new HashMap<>();
 
     /**
      * Creates a data container and loads the data from a .csv file.
@@ -31,7 +37,7 @@ public class InMemoryData implements Data<User, Integer>, Serializable {
     /**
      * Creates a data container with injected data.
      */
-    public InMemoryData(Map<User, Map<Integer, Integer>> ratings) {
+    public InMemoryData(Map<User, Map<Integer, Double>> ratings) {
         this.userRatings = ratings;
     }
 
@@ -41,24 +47,24 @@ public class InMemoryData implements Data<User, Integer>, Serializable {
     public InMemoryData() {}
 
     @Override
-    public Map<Integer, Integer> getRatings(User user) {
+    public Map<Integer, Double> getRatings(User user) {
         return userRatings.get(user);
     }
 
     @Override
-    public Integer getRating(User user, Integer item) {
-        Map<Integer, Integer> userRatings = getRatings(user);
+    public Double getRating(User user, Integer item) {
+        Map<Integer, Double> userRatings = getRatings(user);
         if (userRatings == null)
             return null;
         return userRatings.get(item);
     }
 
     @Override
-    public Map<User, Map<Integer, Integer>> getUserRatingsByItem(Integer item) {
-        Map<User, Map<Integer, Integer>> result = itemCache.get(item);
+    public Map<User, Map<Integer, Double>> getUserRatingsByItem(Integer item) {
+        Map<User, Map<Integer, Double>> result = itemCache.get(item);
         if (result == null) {
             result = new HashMap<>();
-            Map<User, Integer> users = itemRatings.get(item);
+            Map<User, Double> users = itemRatings.get(item);
             if (users != null) {
                 for (User user : users.keySet()) {
                     result.put(user, userRatings.get(user));
@@ -69,20 +75,39 @@ public class InMemoryData implements Data<User, Integer>, Serializable {
         return result;
     }
 
-    public void add(User user, int item, int rating) {
-        Map<Integer, Integer> uRatings = userRatings.get(user);
+    @Override
+    public Map<Integer, Double> getAverageRatings(Collection<Integer> integers) {
+        Map<Integer, Double> average = new HashMap<>();
+        for (Integer item : integers) {
+            average.put(item, getAverage(item));
+        }
+        return average;
+    }
+
+    public void add(User user, int item, double rating) {
+        Map<Integer, Double> uRatings = userRatings.get(user);
         if (uRatings == null) {
             uRatings = new HashMap<>();
             userRatings.put(user, uRatings);
         }
         uRatings.put(item, rating);
 
-        Map<User, Integer> iRatings = itemRatings.get(item);
+        Map<User, Double> iRatings = itemRatings.get(item);
         if (iRatings == null) {
             iRatings = new HashMap<>();
             itemRatings.put(item, iRatings);
         }
         iRatings.put(user, rating);
+
+        Double sum = itemRatingSum.get(item);
+        Integer count = itemRatingCount.get(item);
+        itemRatingSum.put(item, (sum != null ? sum : 0) + rating);
+        itemRatingCount.put(item, (count != null ? count : 0) + 1);
+    }
+
+    private double getAverage(Integer item) {
+        Integer count = itemRatingCount.get(item);
+        return count != null ? itemRatingSum.get(item) / count : Configuration.DEFAULT_AVERAGE;
     }
 
     private void parseData(String filepath) {

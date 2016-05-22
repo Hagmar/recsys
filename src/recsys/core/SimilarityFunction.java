@@ -15,5 +15,5 @@ public interface SimilarityFunction<User> {
      *      means that there are no similarities.
      */
     <Item> double similarity(User u1, User u2, Data<User, Item> data);
-    <Item> double similarity(User u1, User u2, Map<Item, Integer> u1Ratings, Map<Item, Integer> u2Ratings);
+    <Item> double similarity(User u1, User u2, Map<Item, Double> u1Ratings, Map<Item, Double> u2Ratings);
 }
