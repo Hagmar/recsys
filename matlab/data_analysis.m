@@ -109,9 +109,9 @@ title('Non-rated items set to average rating by user')
 
 %%
 % Normalisation using z-score, based on items. All non-rated items have
-% been set to the mean first
-dataz = data;
-dataz(find(isnan(dataz)))
+% been set to the average rating of that item first
+data_z = data_mav;
+data_z = zscore(data_z);
 
 %%
 % Mean ratings of movies vs. number of movies
