@@ -112,6 +112,10 @@ def parse_user_data_100K(dataset, c, occupation_map):
                 gender = splitline[2] == 'F'
                 occupation = occupation_map[splitline[3]]
                 zipcode = splitline[4]
+                try:
+                    zipcode = int(zipcode)
+                except:
+                    zipcode = 0
                 c.execute(insert_user_query,
                         (user_id, age, gender, occupation, zipcode))
 
@@ -201,6 +205,10 @@ def parse_user_data_1M(dataset, c):
                 age = splitline[2]
                 occupation = splitline[3]
                 zipcode = splitline[4]
+                try:
+                    zipcode = int(zipcode)
+                except:
+                    zipcode = 0
                 c.execute(insert_user_query,
                         (user_id, age, gender, occupation, zipcode))
 
@@ -277,7 +285,7 @@ def create_tables(c):
             PRIMARY KEY (movie, genre))''')
     c.execute('''CREATE TABLE users(id INTEGER PRIMARY KEY,
             age INTEGER, gender BOOLEAN,
-            occupation INTEGER REFERENCES occupations(id), zipcode CHAR(5))''')
+            occupation INTEGER REFERENCES occupations(id), zipcode INTEGER)''')
     c.execute('''CREATE TABLE ratings(user INTEGER REFERENCES user(id),
             movie INTEGER NOT NULL REFERENCES movies(id),
             rating INTEGER NOT NULL, timestamp INTEGER)''')
