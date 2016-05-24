@@ -191,7 +191,7 @@ def parse_movie_data_1M_10M(dataset, genre_map, c):
                 for genre in genres.split('|'):
                     try:
                         genre_id = genre_map[genre]
-                        c.execute(insert_moviegenre_query, (movie_id, genre))
+                        c.execute(insert_moviegenre_query, (movie_id, genre_id))
                     except:
                         print("Error, invalid genre \"%s\" for movie %s" % (genre, movie_id))
 
