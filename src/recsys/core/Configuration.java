@@ -21,6 +21,11 @@ public class Configuration {
      * The default rating average for items that have no ratings (probably 0 or 3).
      */
     public static final double DEFAULT_AVERAGE = 3;
+    /**
+     * Determines how much to weight demographics for user similarity. 1 minus this
+     * value is the weight for ratings similarity.
+     */
+    public static final double USER_DEMOGRAPHIC_SIMILARITY_WEIGHT = .1;
 
 
     public enum Smoothing {

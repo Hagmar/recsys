@@ -1,6 +1,7 @@
 package recsys.domain;
 
 import recsys.core.BaseSimilarity;
+import recsys.core.Configuration;
 
 import java.util.Map;
 
@@ -11,11 +12,13 @@ import static java.lang.Math.min;
  */
 public class UserSimilarity extends BaseSimilarity<User> {
 
+    private static final double DEMOGRAPHIC_WEIGHT = Configuration.USER_DEMOGRAPHIC_SIMILARITY_WEIGHT;
+    private static final double RATINGS_WEIGHT = 1 - DEMOGRAPHIC_WEIGHT;
+
     @Override
     public <Item> double similarity(User u1, User u2, Map<Item, Double> ratings1, Map<Item, Double> ratings2) {
-        // TODO Use demographic similarity
-        double demoSimilarity = demographicSimilarity(u1, u2);
-        return cosineSimilarity(ratings1, ratings2);
+        return RATINGS_WEIGHT * cosineSimilarity(ratings1, ratings2) +
+                DEMOGRAPHIC_WEIGHT * demographicSimilarity(u1, u2);
     }
 
     private double cosineSimilarity(Map<?, Double> ratings1, Map<?, Double> ratings2) {
@@ -74,7 +77,7 @@ public class UserSimilarity extends BaseSimilarity<User> {
         }
 
         // Weight somehow?
-        double similarity = genderSimilarity + 0.6*ageSimilarity + 0.2*zipcodeSimilarity + occupationSimilarity;
+        double similarity = .35 * genderSimilarity + 0.35 * ageSimilarity + 0.3 * zipcodeSimilarity + 0 * occupationSimilarity;
 
         return similarity;
     }
