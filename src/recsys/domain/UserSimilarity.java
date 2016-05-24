@@ -51,7 +51,7 @@ public class UserSimilarity extends BaseSimilarity<User> {
         if (u1 == null || u2 == null)
             return 0;
 
-        int genderSimilarity = u1.getGender() == u2.getGender() ? 1 : 0;
+        double genderSimilarity = u1.getGender() == u2.getGender() ? 0.1 : 0;
 
         // Admissible measurement of age similarity?
         double ageSimilarity = Math.abs(u1.getAge() - u2.getAge());
@@ -66,15 +66,15 @@ public class UserSimilarity extends BaseSimilarity<User> {
             zipcodeSimilarity = Math.exp(-0.0002 * zipcodeSimilarity);
         }
 
-        int occupationSimilarity;
+        double occupationSimilarity;
         if (u1.getOccupation() != 0) {
-            occupationSimilarity = 0;
+            occupationSimilarity = u1.getOccupation() == u2.getOccupation() ? 0.1 : 0;
         } else {
-            occupationSimilarity = u1.getOccupation() == u2.getOccupation() ? 1 : 0;
+            occupationSimilarity = 0;
         }
 
         // Weight somehow?
-        double similarity = (genderSimilarity + ageSimilarity + zipcodeSimilarity + occupationSimilarity)/4.0;
+        double similarity = genderSimilarity + 0.6*ageSimilarity + 0.2*zipcodeSimilarity + occupationSimilarity;
 
         return similarity;
     }
