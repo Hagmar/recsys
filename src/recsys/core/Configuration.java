@@ -7,7 +7,7 @@ public class Configuration {
     /**
      * The number of nearest neighbors (k) to use for prediction.
      */
-    public static final int NEAREST_NEIGHBORS_NUMBER = 5;
+    public static final int NEAREST_NEIGHBORS_NUMBER = 30;
     /**
      * Use weighted average (based on user similarity) instead of the mean
      * of the similar users' ratings.
@@ -21,6 +21,11 @@ public class Configuration {
      * The default rating average for items that have no ratings (probably 0 or 3).
      */
     public static final double DEFAULT_AVERAGE = 3;
+    /**
+     * Determines how much to weight demographics for user similarity. 1 minus this
+     * value is the weight for ratings similarity.
+     */
+    public static final double USER_DEMOGRAPHIC_SIMILARITY_WEIGHT = .1;
 
 
     public enum Smoothing {
