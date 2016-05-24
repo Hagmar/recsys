@@ -68,6 +68,7 @@ def parse_occupation_data_100K(dataset, c):
     occupation_map = {}
     insert_occupation_query = 'INSERT INTO occupations(occupation) VALUES (?)'
     with open(os.path.join(dataset, 'u.occupation'), 'r') as occFile:
+        c.execute(insert_occupation_query, (None,))
         for line in occFile:
             if line.rstrip():
                 occupation = line.rstrip()
@@ -152,7 +153,7 @@ def generate_database_1M(dataset, database):
 
 def create_occupation_table_1M(c):
     insert_occupation_query = 'INSERT INTO occupations(id, occupation) VALUES (?, ?)'
-    occupations = ['other', 'academic/educator', 'artist', 'clerical/admin',
+    occupations = [None, 'other', 'academic/educator', 'artist', 'clerical/admin',
             'college/grad student', 'customer service', 'doctor/health care',
             'executive/managerial', 'farmer', 'homemaker', 'K-12 student',
             'lawyer', 'programmer', 'retured', 'sales/marketing',
@@ -203,7 +204,7 @@ def parse_user_data_1M(dataset, c):
                 user_id = splitline[0]
                 gender = splitline[1] == 'F'
                 age = splitline[2]
-                occupation = splitline[3]
+                occupation = int(splitline[3])+1
                 zipcode = splitline[4]
                 try:
                     zipcode = int(zipcode)
