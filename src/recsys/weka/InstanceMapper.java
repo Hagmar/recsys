@@ -24,7 +24,8 @@ class InstanceMapper {
     }
 
     public static User mapUser(Instance instance) {
-        // Instance attributes are [0=user, 1=item, 2=rating, 3=age, 4=gender]
-        return new User((int) instance.value(0), instance.value(4) > 0, (int) instance.value(3));
+        // Instance attributes are [0=user, 1=item, 2=rating, 3=age, 4=gender, 5=zipcode, 6=occupation]
+        return new User((int) instance.value(0), instance.value(4) > 0, (int) instance.value(3),
+                (int) instance.value(5), (int) instance.value(6));
     }
 }
