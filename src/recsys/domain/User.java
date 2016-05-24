@@ -9,15 +9,23 @@ public class User implements Serializable {
     private final int id;
     private final boolean gender;
     private final int age;
+    private final int zipcode;
+    private final int occupation;
 
     public User(int id) {
         this(id, false, 0);
     }
 
     public User(int id, boolean gender, int age) {
+        this(id, gender, age, 0, 0);
+    }
+
+    public User(int id, boolean gender, int age, int zipcode, int occupation) {
         this.id = id;
         this.gender = gender;
         this.age = age;
+        this.zipcode = zipcode;
+        this.occupation = occupation;
     }
 
     public int getId() {
@@ -31,6 +39,10 @@ public class User implements Serializable {
     public int getAge() {
         return age;
     }
+
+    public int getZipcode() { return zipcode; }
+
+    public int getOccupation() { return occupation; }
 
     @Override
     public boolean equals(Object o) {

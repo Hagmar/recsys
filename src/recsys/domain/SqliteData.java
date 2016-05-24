@@ -8,8 +8,8 @@ import java.util.*;
 
 public class SqliteData implements Data<User, Integer>, Serializable {
 
-    private static final String SELECT_SQL = "SELECT user, movie, rating, gender, age FROM ratings " +
-            "JOIN users ON user = users.id";
+    private static final String SELECT_SQL = "SELECT user, movie, rating, gender, age, zipcode, occupation " +
+            "FROM ratings JOIN users ON user = users.id";
 
     private transient Connection conn;
     private transient PreparedStatement getUserRatingsStmt;
@@ -128,6 +128,7 @@ public class SqliteData implements Data<User, Integer>, Serializable {
     }
 
     private User mapUser(ResultSet rs) throws SQLException {
-        return new User(rs.getInt("user"), rs.getBoolean("gender"), rs.getInt("age"));
+        return new User(rs.getInt("user"), rs.getBoolean("gender"), rs.getInt("age"),
+                rs.getInt("zipcode"), rs.getInt("occupation"));
     }
 }

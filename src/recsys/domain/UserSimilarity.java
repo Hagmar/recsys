@@ -5,6 +5,8 @@ import recsys.core.BaseSimilarity;
 import java.io.Serializable;
 import java.util.Map;
 
+import static java.lang.Math.min;
+
 /**
  * Computes the cosine similarity between two users.
  */
@@ -12,6 +14,8 @@ public class UserSimilarity extends BaseSimilarity<User> {
 
     @Override
     public <Item> double similarity(User u1, User u2, Map<Item, Double> ratings1, Map<Item, Double> ratings2) {
+        // TODO Use demographic similarity
+        double demoSimilarity = demographicSimilarity(u1, u2);
         return cosineSimilarity(ratings1, ratings2);
     }
 
@@ -48,5 +52,37 @@ public class UserSimilarity extends BaseSimilarity<User> {
             return 0;
 
         return scalarProduct / (Math.sqrt(length1) * Math.sqrt(length2));
+    }
+
+    private double demographicSimilarity(User u1, User u2) {
+        if (u1 == null || u2 == null)
+            return 0;
+
+        int genderSimilarity = u1.getGender() == u2.getGender() ? 1 : 0;
+
+        // Admissible measurement of age similarity?
+        double ageSimilarity = Math.abs(u1.getAge() - u2.getAge());
+        ageSimilarity = 1 - min(1, ageSimilarity/min(u1.getAge(), u2.getAge()));
+
+        double zipcodeSimilarity;
+        if (u1.getZipcode() == 0) {
+            zipcodeSimilarity = 0;
+        } else {
+            // 0.0002 gives a reasonable similaritp for zip codes in the USA
+            zipcodeSimilarity = Math.abs(u1.getZipcode() - u2.getZipcode());
+            zipcodeSimilarity = Math.exp(-0.0002 * zipcodeSimilarity);
+        }
+
+        int occupationSimilarity;
+        if (u1.getOccupation() != 0) {
+            occupationSimilarity = 0;
+        } else {
+            occupationSimilarity = u1.getOccupation() == u2.getOccupation() ? 1 : 0;
+        }
+
+        // Weight somehow?
+        double similarity = (genderSimilarity + ageSimilarity + zipcodeSimilarity + occupationSimilarity)/4.0;
+
+        return similarity;
     }
 }
