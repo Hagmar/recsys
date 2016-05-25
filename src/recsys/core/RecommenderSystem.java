@@ -54,7 +54,7 @@ public class RecommenderSystem<User, Item> implements Serializable {
         }
 
         if (Configuration.WEIGHTED_AVERAGE) {
-            return sum / denominator;
+            return denominator > 0 ? sum / denominator : 0;
         } else {
             return sum / Configuration.NEAREST_NEIGHBORS_NUMBER;
         }
