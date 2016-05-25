@@ -2,7 +2,6 @@ package recsys.domain;
 
 import recsys.core.BaseSimilarity;
 
-import java.io.Serializable;
 import java.util.Map;
 
 import static java.lang.Math.min;
@@ -32,26 +31,24 @@ public class UserSimilarity extends BaseSimilarity<User> {
 
         // Calculate similarity: cosine similarity = dotProduct(u1, u2) / (||u1|| * ||u2||)
         int scalarProduct = 0;
-        int length1 = 0, length2 = 0;   // ||u1||, ||u2|| length of rating vectors u1 and u2 (squared)
+        int squaredLength1 = 0, squaredLength2 = 0;   // ||u1||^2, ||u2||^2 length of rating vectors u1 and u2 (squared)
         for (Map.Entry<?, Double> u1 : ratings1.entrySet()) {
             Double rating2 = ratings2.get(u1.getKey());
+            // Only consider items that are rated by both users
             if (rating2 != null) {
                 scalarProduct += u1.getValue() * rating2;
+                squaredLength1 += Math.pow(u1.getValue(), 2);
+                squaredLength2 += Math.pow(rating2, 2);
             }
 
-            length1 += Math.pow(u1.getValue(), 2);     // Add to length
         }
 
-        // Calculate length of u2
-        for (Map.Entry<?, Double> u2 : ratings2.entrySet()) {
-            length2 += Math.pow(u2.getValue(), 2);
-        }
+        // Calculate lengths of vectors
+        // Add +1 as smoothing to make users with very small intersection less alike
+        double length1 = Math.sqrt(squaredLength1) + 1;
+        double length2 = Math.sqrt(squaredLength2) + 1;
 
-        // Not defined for zero lengths
-        if (length1 == 0 || length2 == 0)
-            return 0;
-
-        return scalarProduct / (Math.sqrt(length1) * Math.sqrt(length2));
+        return scalarProduct / (length1 * length2);
     }
 
     private double demographicSimilarity(User u1, User u2) {
