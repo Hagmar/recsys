@@ -6,8 +6,6 @@ import recsys.core.Configuration;
 import java.io.Serializable;
 import java.util.Map;
 
-import static java.lang.Math.min;
-
 /**
  * Computes the cosine similarity between two users.
  */
@@ -65,13 +63,13 @@ public class UserSimilarity extends BaseSimilarity<User> {
 
         // Admissible measurement of age similarity?
         double ageSimilarity = Math.abs(u1.getAge() - u2.getAge());
-        ageSimilarity = 1 - min(1, ageSimilarity/min(u1.getAge(), u2.getAge()));
+        ageSimilarity = 1 - Math.min(1, ageSimilarity/Math.min(u1.getAge(), u2.getAge()));
 
         double zipcodeSimilarity;
         if (u1.getZipcode() == 0) {
             zipcodeSimilarity = 0;
         } else {
-            // 0.0002 gives a reasonable similaritp for zip codes in the USA
+            // 0.0002 gives a reasonable similarity for zip codes in the USA
             zipcodeSimilarity = Math.abs(u1.getZipcode() - u2.getZipcode());
             zipcodeSimilarity = Math.exp(-0.0002 * zipcodeSimilarity);
         }
