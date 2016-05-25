@@ -22,33 +22,29 @@ public class UserSimilarity extends BaseSimilarity<User> {
         if (ratings1 == null || ratings2 == null)
             return 0;
 
-        // Set ratings1 as the smaller set
+        // Set ratings1 as the smaller set (to only iterate over the smaller list later)
         if (ratings2.size() < ratings1.size()) {
             Map<?, Double> smaller = ratings2;
             ratings2 = ratings1;
             ratings1 = smaller;
         }
 
-        // Calculate similarity: cosine similarity = dotProduct(u1, u2) / (||u1|| * ||u2||)
-        int scalarProduct = 0;
-        int squaredLength1 = 0, squaredLength2 = 0;   // ||u1||^2, ||u2||^2 length of rating vectors u1 and u2 (squared)
+        double nominator = 0;
+        int length = 1;     // 1 as smoothing to make users with very small intersection less alike
         for (Map.Entry<?, Double> u1 : ratings1.entrySet()) {
             Double rating2 = ratings2.get(u1.getKey());
+
             // Only consider items that are rated by both users
             if (rating2 != null) {
-                scalarProduct += u1.getValue() * rating2;
-                squaredLength1 += Math.pow(u1.getValue(), 2);
-                squaredLength2 += Math.pow(rating2, 2);
+                double rating1 = u1.getValue();
+                // Difference [0-1] is 1 for equal ratings and 0 for ratings furthest apart (1 and 5)
+                double difference = 1 - Math.pow(Math.abs(rating2 - rating1) / 4.0, 1.5);
+                nominator += Math.pow(difference, 2);
+                length++;
             }
-
         }
 
-        // Calculate lengths of vectors
-        // Add +1 as smoothing to make users with very small intersection less alike
-        double length1 = Math.sqrt(squaredLength1) + 1;
-        double length2 = Math.sqrt(squaredLength2) + 1;
-
-        return scalarProduct / (length1 * length2);
+        return nominator / length;
     }
 
     private double demographicSimilarity(User u1, User u2) {
