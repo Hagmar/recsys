@@ -56,7 +56,6 @@ def generate_database_100K(dataset, database):
     create_tables(c)
 
     occupation_map = parse_occupation_data_100K(dataset, c)
-    parse_genre_data_100K(dataset, c)
     parse_movie_data_100K(dataset, c)
     parse_user_data_100K(dataset, c, occupation_map)
     parse_rating_data_100K(dataset, c)
@@ -66,41 +65,34 @@ def generate_database_100K(dataset, database):
 
 def parse_occupation_data_100K(dataset, c):
     occupation_map = {}
-    insert_occupation_query = 'INSERT INTO occupations(occupation) VALUES (?)'
     with open(os.path.join(dataset, 'u.occupation'), 'r') as occFile:
-        c.execute(insert_occupation_query, (None,))
         for line in occFile:
             if line.rstrip():
                 occupation = line.rstrip()
-                c.execute(insert_occupation_query, (occupation,))
                 occupation_map[occupation] = c.lastrowid
 
     return occupation_map
 
-def parse_genre_data_100K(dataset, c):
-    insert_genre_query = 'INSERT INTO genres(id, name) VALUES (?, ?)'
-    with open(os.path.join(dataset, 'u.genre'), 'r') as genreFile:
-        for line in genreFile:
-            if line.rstrip():
-                [genre, gid] = line.rstrip().split('|')
-                c.execute(insert_genre_query, (gid, genre))
-
 def parse_movie_data_100K(dataset, c):
-    insert_movie_query = 'INSERT INTO movies(id, title, releasedate) VALUES (?, ?, ?)'
-    insert_moviegenre_query = 'INSERT INTO moviegenres(movie, genre) VALUES (?, ?)'
+    insert_movie_query = '''INSERT INTO movies VALUES
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'''
     with open(os.path.join(dataset, 'u.item'), 'r') as movieFile:
         for line in movieFile:
+            movie_data = [0]*22
             if line.rstrip():
                 splitline = line.rstrip().split('|')
                 movie_id = splitline[0]
                 title = splitline[1]
                 releasedate = splitline[2]
-                c.execute(insert_movie_query, (movie_id, title, releasedate))
+                movie_data[0] = movie_id
+                movie_data[1] = title
+                movie_data[2] = releasedate
 
                 genres = splitline[5:]
                 for (genre, isGenre) in enumerate(genres):
                     if isGenre == '1':
-                        c.execute(insert_moviegenre_query, (movie_id, genre))
+                        movie_data[genre+3] = True
+                c.execute(insert_movie_query, movie_data)
 
 def parse_user_data_100K(dataset, c, occupation_map):
     insert_user_query = 'INSERT INTO users(id, age, gender, occupation, zipcode) VALUES (?, ?, ?, ?, ?)'
@@ -142,7 +134,6 @@ def generate_database_1M(dataset, database):
 
     create_tables(c)
 
-    create_occupation_table_1M(c)
     genre_map = make_genre_map_1M(c)
     parse_movie_data_1M_10M(dataset, genre_map, c)
     parse_user_data_1M(dataset, c)
@@ -151,49 +142,41 @@ def generate_database_1M(dataset, database):
     conn.commit()
     conn.close()
 
-def create_occupation_table_1M(c):
-    insert_occupation_query = 'INSERT INTO occupations(id, occupation) VALUES (?, ?)'
-    occupations = [None, 'other', 'academic/educator', 'artist', 'clerical/admin',
-            'college/grad student', 'customer service', 'doctor/health care',
-            'executive/managerial', 'farmer', 'homemaker', 'K-12 student',
-            'lawyer', 'programmer', 'retured', 'sales/marketing',
-            'scientist', 'self-employed', 'technician/engineer',
-            'tradesman/craftsman', 'unemployed', 'writer']
-    for occ_id, occupation in enumerate(occupations):
-        c.execute(insert_occupation_query, (occ_id, occupation))
-
 def make_genre_map_1M(c):
     genre_map = {}
     genres = ["Action", "Adventure", "Animation", "Children's", "Comedy",
             "Crime", "Documentary", "Drama", "Fantasy", "Film-Noir", "Horror",
             "Musical", "Mystery", "Romance", "Sci-Fi", "Thriller", "War",
             "Western"]
-    insert_genre_query = 'INSERT INTO genres(id, name) VALUES (?, ?)'
     for (gid, genre) in enumerate(genres):
         genre_map[genre] = gid
-        c.execute(insert_genre_query, (gid, genre))
 
     return genre_map
 
 def parse_movie_data_1M_10M(dataset, genre_map, c):
-    insert_movie_query = 'INSERT INTO movies(id, title, releasedate) VALUES (?, ?, ?)'
-    insert_moviegenre_query = 'INSERT INTO moviegenres(movie, genre) VALUES (?, ?)'
+    insert_movie_query = '''INSERT INTO movies VALUES
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'''
     with open(os.path.join(dataset, 'movies.dat'), 'r') as movieFile:
         for line in movieFile:
+            movie_data = [0]*22
             if line.rstrip():
                 splitline = line.rstrip().split('::')
                 movie_id = splitline[0]
                 title = splitline[1]
                 releasedate = title[-5:-1]
-                c.execute(insert_movie_query, (movie_id, title, releasedate))
+
+                movie_data[0] = movie_id
+                movie_data[1] = title
+                movie_data[2] = releasedate
 
                 genres = splitline[2]
                 for genre in genres.split('|'):
                     try:
                         genre_id = genre_map[genre]
-                        c.execute(insert_moviegenre_query, (movie_id, genre_id))
+                        movie_data[genre_id+3] = 1
                     except:
                         print("Error, invalid genre \"%s\" for movie %s" % (genre, movie_id))
+                c.execute(insert_movie_query, movie_data)
 
 def parse_user_data_1M(dataset, c):
     insert_user_query = 'INSERT INTO users(id, age, gender, occupation, zipcode) VALUES (?, ?, ?, ?, ?)'
@@ -276,14 +259,27 @@ def parse_rating_data_10M(dataset, c):
                 c.execute(insert_rating_query, (user, movie, rating, tstamp))
 
 def create_tables(c):
-    c.execute('''CREATE TABLE occupations(id INTEGER PRIMARY KEY ASC,
-            occupation TEXT)''')
     c.execute('''CREATE TABLE movies(id INTEGER PRIMARY KEY,
-            title TEXT NOT NULL, releasedate TEXT)''')
-    c.execute('''CREATE TABLE genres(id INTEGER PRIMARY KEY ASC, name TEXT)''')
-    c.execute('''CREATE TABLE moviegenres(movie INTEGER REFERENCES movies(id),
-            genre INTEGER REFERENCES genres(id),
-            PRIMARY KEY (movie, genre))''')
+            title TEXT NOT NULL, releasedate TEXT,
+            g_1 BOOLEAN DEFAULT FALSE,
+            g_2 BOOLEAN DEFAULT FALSE,
+            g_3 BOOLEAN DEFAULT FALSE,
+            g_4 BOOLEAN DEFAULT FALSE,
+            g_5 BOOLEAN DEFAULT FALSE,
+            g_6 BOOLEAN DEFAULT FALSE,
+            g_7 BOOLEAN DEFAULT FALSE,
+            g_8 BOOLEAN DEFAULT FALSE,
+            g_9 BOOLEAN DEFAULT FALSE,
+            g_10 BOOLEAN DEFAULT FALSE,
+            g_11 BOOLEAN DEFAULT FALSE,
+            g_12 BOOLEAN DEFAULT FALSE,
+            g_13 BOOLEAN DEFAULT FALSE,
+            g_14 BOOLEAN DEFAULT FALSE,
+            g_15 BOOLEAN DEFAULT FALSE,
+            g_16 BOOLEAN DEFAULT FALSE,
+            g_17 BOOLEAN DEFAULT FALSE,
+            g_18 BOOLEAN DEFAULT FALSE,
+            g_19 BOOLEAN DEFAULT FALSE)''')
     c.execute('''CREATE TABLE users(id INTEGER PRIMARY KEY,
             age INTEGER, gender BOOLEAN,
             occupation INTEGER REFERENCES occupations(id), zipcode INTEGER)''')
