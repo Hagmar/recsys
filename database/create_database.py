@@ -86,7 +86,7 @@ def parse_movie_data_100K(dataset, c):
                 releasedate = splitline[2]
                 movie_data[0] = movie_id
                 movie_data[1] = title
-                movie_data[2] = releasedate
+                movie_data[2] = releasedate[-4:]
 
                 genres = splitline[5:]
                 for (genre, isGenre) in enumerate(genres):
@@ -257,7 +257,7 @@ def parse_rating_data_10M(dataset, c):
 
 def create_tables(c):
     c.execute('''CREATE TABLE movies(id INTEGER PRIMARY KEY,
-            title TEXT NOT NULL, releasedate TEXT,
+            title TEXT NOT NULL, releasedate INTEGER,
             g_1 BOOLEAN DEFAULT FALSE,
             g_2 BOOLEAN DEFAULT FALSE,
             g_3 BOOLEAN DEFAULT FALSE,
