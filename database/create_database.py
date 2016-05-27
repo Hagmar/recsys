@@ -113,7 +113,7 @@ def parse_user_data_100K(dataset, c, occupation_map):
                         (user_id, age, gender, occupation, zipcode))
 
 def parse_rating_data_100K(dataset, c):
-    insert_rating_query = 'INSERT INTO ratings(user, movie, rating, timestamp) VALUES (?, ?, ?, ?)'
+    insert_rating_query = 'INSERT INTO ratings(user, movie, rating) VALUES (?, ?, ?)'
     with open(os.path.join(dataset, 'u.data'), 'r') as ratingFile:
         for line in ratingFile:
             if line.rstrip():
@@ -121,8 +121,7 @@ def parse_rating_data_100K(dataset, c):
                 user = splitline[0]
                 movie = splitline[1]
                 rating = splitline[2]
-                tstamp = splitline[3]
-                c.execute(insert_rating_query, (user, movie, rating, tstamp))
+                c.execute(insert_rating_query, (user, movie, rating))
 
 def generate_database_1M(dataset, database):
     if os.path.isfile(database):
@@ -197,7 +196,7 @@ def parse_user_data_1M(dataset, c):
                         (user_id, age, gender, occupation, zipcode))
 
 def parse_rating_data_1M(dataset, c):
-    insert_rating_query = 'INSERT INTO ratings(user, movie, rating, timestamp) VALUES (?, ?, ?, ?)'
+    insert_rating_query = 'INSERT INTO ratings(user, movie, rating) VALUES (?, ?, ?)'
     with open(os.path.join(dataset, 'ratings.dat'), 'r') as ratingFile:
         for line in ratingFile:
             if line.rstrip():
@@ -205,8 +204,7 @@ def parse_rating_data_1M(dataset, c):
                 user = splitline[0]
                 movie = splitline[1]
                 rating = splitline[2]
-                tstamp = splitline[3]
-                c.execute(insert_rating_query, (user, movie, rating, tstamp))
+                c.execute(insert_rating_query, (user, movie, rating))
 
 
 def generate_database_10M(dataset, database):
@@ -247,7 +245,7 @@ def insers_users_10M(c):
         c.execute(insert_user_query, (user, None, None, None, None))
 
 def parse_rating_data_10M(dataset, c):
-    insert_rating_query = 'INSERT INTO ratings(user, movie, rating, timestamp) VALUES (?, ?, ?, ?)'
+    insert_rating_query = 'INSERT INTO ratings(user, movie, rating) VALUES (?, ?, ?)'
     with open(os.path.join(dataset, 'ratings.dat'), 'r') as ratingFile:
         for line in ratingFile:
             if line.rstrip():
@@ -255,8 +253,7 @@ def parse_rating_data_10M(dataset, c):
                 user = splitline[0]
                 movie = splitline[1]
                 rating = int(round(float(splitline[2])))
-                tstamp = splitline[3]
-                c.execute(insert_rating_query, (user, movie, rating, tstamp))
+                c.execute(insert_rating_query, (user, movie, rating))
 
 def create_tables(c):
     c.execute('''CREATE TABLE movies(id INTEGER PRIMARY KEY,
@@ -285,7 +282,7 @@ def create_tables(c):
             occupation INTEGER REFERENCES occupations(id), zipcode INTEGER)''')
     c.execute('''CREATE TABLE ratings(user INTEGER REFERENCES user(id),
             movie INTEGER NOT NULL REFERENCES movies(id),
-            rating INTEGER NOT NULL, timestamp INTEGER)''')
+            rating INTEGER NOT NULL)''')
 
 
 if __name__ == '__main__':
