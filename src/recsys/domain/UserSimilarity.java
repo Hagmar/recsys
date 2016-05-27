@@ -69,9 +69,10 @@ public class UserSimilarity extends BaseSimilarity<User> {
         if (u1.getZipcode() == 0) {
             zipcodeSimilarity = 0;
         } else {
-            // 0.0002 gives a reasonable similarity for zip codes in the USA
+            // Quadratic function giving 0 similarity to 100.000 difference in zip code
             zipcodeSimilarity = Math.abs(u1.getZipcode() - u2.getZipcode());
-            zipcodeSimilarity = Math.exp(-0.0002 * zipcodeSimilarity);
+            zipcodeSimilarity = 1-(Math.pow(zipcodeSimilarity, 2)/10000000000.0);
+            zipcodeSimilarity = Math.max(zipcodeSimilarity, 0);
         }
 
         double occupationSimilarity;
@@ -81,8 +82,7 @@ public class UserSimilarity extends BaseSimilarity<User> {
             occupationSimilarity = 0;
         }
 
-        // Weight somehow?
-        double similarity = .35 * genderSimilarity + 0.35 * ageSimilarity + 0.3 * zipcodeSimilarity + 0 * occupationSimilarity;
+        double similarity = .4 * genderSimilarity + 0.4 * ageSimilarity + 0.2 * zipcodeSimilarity + 0 * occupationSimilarity;
 
         return similarity;
     }
