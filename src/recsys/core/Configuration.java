@@ -27,6 +27,11 @@ public class Configuration {
      */
     public static final double USER_DEMOGRAPHIC_SIMILARITY_WEIGHT = .1;
 
+    /**
+     * The number of genres that exist. Needed to determine the size of the genre
+     * array for movies.
+     */
+    public static final int NUMBER_OF_GENRES = 19;
 
     public enum Smoothing {
         /** Smoothing disabled. */
