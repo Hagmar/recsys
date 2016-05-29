@@ -6,9 +6,9 @@ clc
 
 load u.data
 
-n_users = 943;
-n_movies = 1682;
-n_ratings = 100000;
+n_users = max(u(:,1));
+n_movies = max(u(:,2));
+[n_ratings junk] = size(u);
 rat = [1 2 3 4 5];
 
 ini_val = NaN;
@@ -116,15 +116,34 @@ data_z = zscore(data_z);
 index = find(isnan(data));
 data_z(index) = NaN;
 
+save_dz = zeros(size(u));
+[r,c] = find(~isnan(data_z));
+save_dz(:,1) = c;
+save_dz(:,2) = r;
+index = find(~isnan(data_z));
+save_dz(:,3) = data_z(index);
+csvwrite('z_score.csv',save_dz)
+
 %% Gaussian Normalisation
 gu_rating = nanmean(data);      % Average rating by each user
 gu_rating = repmat(gu_rating, n_movies, 1);
 diff = data - gu_rating;
 enumerator = diff;
+index = find(isnan(diff));
 diff(index) = 0;  
 denominator = sqrt(sum(diff.^2));
 denominator = repmat(denominator, n_movies, 1);
 g_norm = enumerator ./ denominator;
+
+save_gn = zeros(size(u));
+[r,c] = find(~isnan(g_norm));
+save_gn(:,1) = c;
+save_gn(:,2) = r;
+index = find(~isnan(g_norm));
+save_gn(:,3) = g_norm(index);
+csvwrite('g_norm.csv',save_gn)
+
+
 
 %%
 % Mean ratings of movies vs. number of movies
