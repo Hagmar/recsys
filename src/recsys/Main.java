@@ -1,6 +1,7 @@
 package recsys;
 
 import recsys.core.Data;
+import recsys.core.ItemSimilarityFunction;
 import recsys.core.RecommenderSystem;
 import recsys.core.SimilarityFunction;
 import recsys.domain.*;
@@ -15,8 +16,12 @@ public class Main {
         // Instantiate the similarity function to use
         SimilarityFunction<User> similarity = SimilarityFunctionFactory.getFunction();
 
+        // Instantiate the item similarity function to use
+        ItemSimilarityFunction<Movie> itemSimilarity = SimilarityFunctionFactory.getMovieFunction();
+        itemSimilarity = null;
+
         // Create recommender system
-        RecommenderSystem<User, Integer> system = new RecommenderSystem<>(data, similarity);
+        RecommenderSystem<User, Integer> system = new RecommenderSystem<>(data, similarity, null);
 
         // Run command line interface
         CLI commandLineInterface = new CLI(system);

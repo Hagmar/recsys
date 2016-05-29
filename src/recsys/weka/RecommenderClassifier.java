@@ -3,6 +3,8 @@ package recsys.weka;
 import recsys.core.Data;
 import recsys.core.RecommenderSystem;
 import recsys.core.SimilarityFunction;
+import recsys.core.ItemSimilarityFunction;
+import recsys.domain.Movie;
 import recsys.domain.SimilarityFunctionFactory;
 import recsys.domain.User;
 import weka.classifiers.Classifier;
@@ -14,18 +16,19 @@ import weka.core.Instances;
  */
 class RecommenderClassifier extends Classifier {
 
-    private RecommenderSystem<User, Integer> system;
+    private RecommenderSystem<User, Movie> system;
 
     @Override
     public void buildClassifier(Instances instances) throws Exception {
         SimilarityFunction<User> similarity = SimilarityFunctionFactory.getFunction();
-        Data<User, Integer> data = InstanceMapper.map(instances);
-        system = new RecommenderSystem<>(data, similarity);
+        ItemSimilarityFunction<Movie> itemSimilarity = SimilarityFunctionFactory.getMovieFunction();
+        Data<User, Movie> data = InstanceMapper.map(instances);
+        system = new RecommenderSystem<>(data, similarity, itemSimilarity);
     }
 
     @Override
     public double classifyInstance(Instance instance) throws Exception {
         // Attribute 1=item
-        return system.predictRating(InstanceMapper.mapUser(instance), (int) instance.value(1));
+        return system.predictRating(InstanceMapper.mapUser(instance), InstanceMapper.mapMovie(instance));
     }
 }

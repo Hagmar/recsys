@@ -9,18 +9,29 @@ import weka.core.Instance;
 import weka.core.Instances;
 
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Maps Weka {@link weka.core.Instances} to a {@link recsys.core.Data} container.
  */
 class InstanceMapper {
 
-    public static Data<User, Integer> map(Instances instances) {
+    public static Data<User, Movie> map(Instances instances) {
         InMemoryData data = new InMemoryData();
         Enumeration<Instance> enumeration = instances.enumerateInstances();
+        Map<Integer, Movie> movieMap = new HashMap<>();
+        Movie instanceMovie;
         while (enumeration.hasMoreElements()) {
             Instance instance = enumeration.nextElement();
-            data.add(mapUser(instance), (int) instance.value(1), (int) instance.value(2));
+
+            int movieId = (int) instance.value(1);
+            instanceMovie = movieMap.get(movieId);
+            if (instanceMovie == null) {
+                instanceMovie = movieMap.put(movieId, mapMovie(instance));
+            }
+
+            data.add(mapUser(instance), instanceMovie, (int) instance.value(2));
         }
         return data;
     }
@@ -32,7 +43,7 @@ class InstanceMapper {
     }
 
     public static Movie mapMovie(Instance instance) {
-        // Instance attributes are [1=movie id, 7=releasedate, 8-26=genres 1-19]
+        // Instance attributes are [1=movie, 7=releasedate, 8-26=genres 1-19]
         boolean[] genres = new boolean[Configuration.NUMBER_OF_GENRES];
         for (int i = 0; i < Configuration.NUMBER_OF_GENRES; i++) {
             genres[i] = instance.value(i+7) > 0;

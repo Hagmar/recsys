@@ -9,6 +9,11 @@ public class Configuration {
      */
     public static final int NEAREST_NEIGHBORS_NUMBER = 30;
     /**
+     * The number of nearest neighbors (k) to use for content-based prediction on
+     * movie features.
+     */
+    public static final int MOVIE_NEAREST_NEIGHBORS_NUMBER = 15;
+    /**
      * Use weighted average (based on user similarity) instead of the mean
      * of the similar users' ratings.
      */
@@ -26,7 +31,6 @@ public class Configuration {
      * value is the weight for ratings similarity.
      */
     public static final double USER_DEMOGRAPHIC_SIMILARITY_WEIGHT = .1;
-
     /**
      * The number of genres that exist. Needed to determine the size of the genre
      * array for movies.

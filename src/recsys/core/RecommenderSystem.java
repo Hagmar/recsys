@@ -13,10 +13,13 @@ public class RecommenderSystem<User, Item> implements Serializable {
 
     private final Data<User, Item> data;
     private final SimilarityFunction<User> similarity;
+    private final ItemSimilarityFunction<Item> itemSimilarity;
 
-    public RecommenderSystem(Data<User, Item> data, SimilarityFunction<User> similarity) {
+    public RecommenderSystem(Data<User, Item> data, SimilarityFunction<User> similarity,
+                             ItemSimilarityFunction<Item> itemSimilarity) {
         this.data = data;
         this.similarity = new SimilarityCache<>(similarity);
+        this.itemSimilarity = itemSimilarity;
     }
 
     public double predictRating(User user, Item item) {
@@ -29,7 +32,12 @@ public class RecommenderSystem<User, Item> implements Serializable {
         } else {
             userRatings = new HashMap<>();
         }
-        
+        double collaborativeRating = collaborativeFilteringPrediction(user, item, userRatings);
+        double contentRating = contentBasedPrediction(user, item);
+        return 0.7*collaborativeRating+0.3*contentRating;
+    }
+
+    private double collaborativeFilteringPrediction(User user, Item item, Map<Item, Double> userRatings){
         // Find all users who have rated the item
         Map<User, Map<Item, Double>> otherUsers = data.getUserRatingsByItem(item);
 
@@ -40,7 +48,7 @@ public class RecommenderSystem<User, Item> implements Serializable {
         // Find the nearest neighbors among all the users who have rated the item
         Map<User, Double> kNN = findKNN(user, userRatings, otherUsers,
                 Configuration.NEAREST_NEIGHBORS_NUMBER);
-        
+
         // User rates the item according to the [weighted] average of the k nearest neighbors
         float sum = 0, denominator = 0;
         for (Entry<User, Double> pair : kNN.entrySet()) {
@@ -57,6 +65,37 @@ public class RecommenderSystem<User, Item> implements Serializable {
             return denominator > 0 ? sum / denominator : 0;
         } else {
             return sum / Configuration.NEAREST_NEIGHBORS_NUMBER;
+        }
+    }
+
+    private double contentBasedPrediction(User user, Item item) {
+        // Find all movies which the user has rated
+        Map<Item, Double> ratedMovies = data.getRatings(user);
+
+        // TODO smoothing
+        //if (Configuration.SMOOTHING != Configuration.Smoothing.NONE) {
+        //    ratedMovies.put(null, getSmoothingRatings(userRatings.keySet(), item));
+        //}
+
+        // Find the nearest neighbors among all the movies which the user has rated
+        Map<Item, Double> kNN = findKNNMovies(item, ratedMovies, Configuration.MOVIE_NEAREST_NEIGHBORS_NUMBER);
+
+        // User rates the item according to the [weighted] average of the k nearest neighbors
+        float sum = 0, denominator = 0;
+        for (Entry<Item, Double> pair : kNN.entrySet()) {
+            double rating = ratedMovies.get(pair.getKey());
+            if (Configuration.WEIGHTED_AVERAGE) {
+                denominator += pair.getValue();
+                sum += pair.getValue() * rating;
+            } else {
+                sum += rating;
+            }
+        }
+
+        if (Configuration.WEIGHTED_AVERAGE) {
+            return denominator > 0 ? sum / denominator : 0;
+        } else {
+            return sum / Configuration.MOVIE_NEAREST_NEIGHBORS_NUMBER;
         }
     }
 
@@ -104,6 +143,45 @@ public class RecommenderSystem<User, Item> implements Serializable {
         	}
         }
     	return kNN;
+    }
+
+    /**
+     * Finds the k nearest neighbors of movies
+     * @param item The movie to find the nearest neighbors of
+     * @param ratedMovies The ratings of the user to find nearest neighbors of
+     * @param k Number of nearest neighbors to find
+     * @return Map of nearest neighbors and their similarity with item
+     */
+    private Map<Item, Double> findKNNMovies(Item item, Map<Item, Double> ratedMovies, int k) {
+        Map<Item, Double> kNN = new HashMap<Item, Double>(); 	// map of movies and similarity to item
+        double minSim = 2; 		// minimum similarity of item and its k nearest neighbors
+        for (Entry<Item, Double> entry : ratedMovies.entrySet()) {
+            Item i = entry.getKey();
+            double sim = itemSimilarity.similarity(item, i);
+            if (kNN.size() < k) {
+                // Fill up map of movies
+                kNN.put(i, sim);
+                if (sim < minSim) {
+                    minSim = sim;
+                }
+            } else if(sim > minSim) { 	// add i to movies and remove least similar item in movies
+                kNN.put(i, sim);
+                Iterator<Entry<Item, Double>> it = kNN.entrySet().iterator();
+                double oldMinSim = minSim;
+                minSim = sim;		// sim not necessarily smallest value, minSim is updated in the while loop
+                while (it.hasNext()) {
+                    Map.Entry<Item, Double> pair = (Entry<Item, Double>) it.next();
+                    double value = pair.getValue();
+                    if (value == oldMinSim && kNN.size() > k) {
+                        // remove old neighbor with smallest value of similarity
+                        it.remove();
+                    } else if (value < minSim) {
+                        minSim = value;
+                    }
+                }
+            }
+        }
+        return kNN;
     }
 
     /**

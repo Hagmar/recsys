@@ -1,13 +1,19 @@
 package recsys.domain;
 
+import recsys.core.ItemSimilarityFunction;
+
+import java.io.Serializable;
 import java.util.Map;
 
 /**
  * Computes the similarity between two users.
  */
-public class MovieSimilarity {
+public class MovieSimilarity implements ItemSimilarityFunction<Movie>, Serializable{
 
     public double similarity(Movie m1, Movie m2) {
+        if (m1 == null || m2 == null)
+            return 0;
+
         double yearSimilarity;
         if (m1.getYear() == 0) {
             yearSimilarity = 0;
@@ -22,9 +28,6 @@ public class MovieSimilarity {
     }
 
     private double cosineSimilarity(Movie m1, Movie m2) {
-        if (m1 == null || m2 == null)
-            return 0;
-
         int scalarProduct = 0;
         int length1 = 0, length2 = 0;   // ||u1||, ||u2|| length of rating vectors u1 and u2 (squared)
         boolean[] m1genres = m1.getGenres();
