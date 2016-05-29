@@ -107,11 +107,24 @@ xlabel('Ratings')
 ylabel('# of ratings')
 title('Non-rated items set to average rating by user')
 
-%%
+%% Z-score
 % Normalisation using z-score, based on items. All non-rated items have
 % been set to the average rating of that item first
 data_z = data_mav;
 data_z = zscore(data_z);
+% Remove items that weren't originally rated
+index = find(isnan(data));
+data_z(index) = NaN;
+
+%% Gaussian Normalisation
+gu_rating = nanmean(data);      % Average rating by each user
+gu_rating = repmat(gu_rating, n_movies, 1);
+diff = data - gu_rating;
+enumerator = diff;
+diff(index) = 0;  
+denominator = sqrt(sum(diff.^2));
+denominator = repmat(denominator, n_movies, 1);
+g_norm = enumerator ./ denominator;
 
 %%
 % Mean ratings of movies vs. number of movies
