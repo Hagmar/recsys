@@ -15,11 +15,11 @@ public class UserSimilarity extends BaseSimilarity<User> {
 
     @Override
     public <Item> double similarity(User u1, User u2, Map<Item, Double> ratings1, Map<Item, Double> ratings2) {
-        return RATINGS_WEIGHT * cosineSimilarity(ratings1, ratings2) +
+        return RATINGS_WEIGHT * ratingSimilarity(ratings1, ratings2) +
                 DEMOGRAPHIC_WEIGHT * demographicSimilarity(u1, u2);
     }
 
-    private double cosineSimilarity(Map<?, Double> ratings1, Map<?, Double> ratings2) {
+    private double ratingSimilarity(Map<?, Double> ratings1, Map<?, Double> ratings2) {
         if (ratings1 == null || ratings2 == null)
             return 0;
 
