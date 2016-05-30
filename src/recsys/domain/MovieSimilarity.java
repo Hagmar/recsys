@@ -1,5 +1,6 @@
 package recsys.domain;
 
+import recsys.core.Configuration;
 import recsys.core.ItemSimilarityFunction;
 
 import java.io.Serializable;
@@ -10,6 +11,9 @@ import java.util.Map;
  */
 public class MovieSimilarity implements ItemSimilarityFunction<Movie>, Serializable{
 
+    private static final double YEAR_WEIGHT = Configuration.MOVIE_GENRE_SIMILARITY_WEIGHT;
+    private static final double GENRE_WEIGHT = 1 - YEAR_WEIGHT;
+
     public double similarity(Movie m1, Movie m2) {
         if (m1 == null || m2 == null)
             return 0;
@@ -18,13 +22,12 @@ public class MovieSimilarity implements ItemSimilarityFunction<Movie>, Serializa
         if (m1.getYear() == 0) {
             yearSimilarity = 0;
         } else {
-            // 0.0002 gives a reasonable similarity for zip codes in the USA
             yearSimilarity = Math.abs(m1.getYear() - m2.getYear());
-            yearSimilarity = Math.exp(-0.2 * yearSimilarity);
+            yearSimilarity = 1-(Math.pow(yearSimilarity, 2)/2500.0);
+            yearSimilarity = Math.max(yearSimilarity, 0);
         }
         double genreSimilarity = cosineSimilarity(m1, m2);
-        // TODO Weight genre and year similarity
-        return genreSimilarity;
+        return yearSimilarity*YEAR_WEIGHT+genreSimilarity*GENRE_WEIGHT;
     }
 
     private double cosineSimilarity(Movie m1, Movie m2) {
@@ -34,9 +37,11 @@ public class MovieSimilarity implements ItemSimilarityFunction<Movie>, Serializa
         boolean[] m2genres = m2.getGenres();
         for (int i = 0; i < 19; i++) {
             if (m1genres[i] == m2genres[i]) {
-                scalarProduct++;
-                length1++;
-                length2++;
+                if (m1genres[i]) {
+                    scalarProduct++;
+                    length1++;
+                    length2++;
+                }
             } else if (m1genres[i]) {
                 length1++;
             } else {

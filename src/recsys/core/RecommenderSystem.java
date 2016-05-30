@@ -11,6 +11,8 @@ import java.util.Map.Entry;
  */
 public class RecommenderSystem<User, Item> implements Serializable {
 
+    private static final double COLLABORATIVE_WEIGHT = Configuration.COLLABORATIVE_RATING_WEIGHT;
+    private static final double CONTENT_WEIGHT = 1 - COLLABORATIVE_WEIGHT;
     private final Data<User, Item> data;
     private final SimilarityFunction<User> similarity;
     private final ItemSimilarityFunction<Item> itemSimilarity;
@@ -34,7 +36,7 @@ public class RecommenderSystem<User, Item> implements Serializable {
         }
         double collaborativeRating = collaborativeFilteringPrediction(user, item, userRatings);
         double contentRating = contentBasedPrediction(user, item);
-        return 0.7*collaborativeRating+0.3*contentRating;
+        return COLLABORATIVE_WEIGHT*collaborativeRating + CONTENT_WEIGHT*contentRating;
     }
 
     private double collaborativeFilteringPrediction(User user, Item item, Map<Item, Double> userRatings){

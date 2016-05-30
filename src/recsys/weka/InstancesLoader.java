@@ -17,7 +17,7 @@ class InstancesLoader {
 
     private static Instances getFromDatabase() throws Exception {
         InstanceQuery query = new InstanceQuery();
-        query.setQuery("SELECT user, movie, rating, age, gender, zipcode, occupation " +
+        query.setQuery("SELECT user, movie, rating, age, gender, zipcode, occupation, " +
                 "releasedate, g_1, g_2, g_3, g_4, g_5, g_6, g_7, g_8, g_9, g_10, g_11, g_12," +
                 "g_13, g_14, g_15, g_16, g_17, g_18, g_19 " +
                 "FROM ratings JOIN users ON user = users.id JOIN movies ON movie = movies.id");
