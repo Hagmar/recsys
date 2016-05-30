@@ -145,11 +145,11 @@ index = find(~isnan(data_z));
 save_dz(:,3) = data_z(index);
 csvwrite('z_score.csv',save_dz)
 
-%% Gaussian Normalisation
+%% Gaussian Normalisation and Pearson Normalisation
 gu_rating = nanmean(data);      % Average rating by each user
 gu_rating = repmat(gu_rating, n_movies, 1);
 diff = data - gu_rating;
-enumerator = diff;
+enumerator = diff;      % Also Pearson normalisation
 index = find(isnan(diff));
 diff(index) = 0;  
 denominator = sqrt(sum(diff.^2));
@@ -163,6 +163,19 @@ save_gn(:,2) = r;
 index = find(~isnan(g_norm));
 save_gn(:,3) = g_norm(index);
 csvwrite('g_norm.csv',save_gn)
+
+
+%% Save Pearson Normalisation
+save_pn = zeros(size(u));
+[r,c] = find(~isnan(enumerator));
+save_pn(:,1) = c;
+save_pn(:,2) = r;
+index = find(~isnan(enumerator));
+save_pn(:,3) = enumerator(index);
+csvwrite('p_norm.csv', save_pn)
+
+
+
 
 
 
