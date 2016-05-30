@@ -282,7 +282,7 @@ def create_tables(c):
             occupation INTEGER REFERENCES occupations(id), zipcode INTEGER)''')
     c.execute('''CREATE TABLE ratings(user INTEGER REFERENCES user(id),
             movie INTEGER NOT NULL REFERENCES movies(id),
-            rating INTEGER NOT NULL)''')
+            rating DOUBLE NOT NULL)''')
 
 
 if __name__ == '__main__':
