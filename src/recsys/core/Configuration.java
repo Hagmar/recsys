@@ -21,7 +21,7 @@ public class Configuration {
     /**
      * Sets the smoothing mode.
      */
-    public static final Smoothing SMOOTHING = Smoothing.ITEM_AVERAGE;
+    public static final Smoothing SMOOTHING = Smoothing.NONE;
     /**
      * The default rating average for items that have no ratings (probably 0 or 3).
      */

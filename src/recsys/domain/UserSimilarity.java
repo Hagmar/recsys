@@ -30,22 +30,26 @@ public class UserSimilarity extends BaseSimilarity<User> {
             ratings1 = smaller;
         }
 
+        // Calculate with Pearson similarity
         double nominator = 0;
-        int length = 1;     // 1 as smoothing to make users with very small intersection less alike
+        double denominator1 = 0, denominator2 = 0;
+        int ratedByBoth = 0;
         for (Map.Entry<?, Double> u1 : ratings1.entrySet()) {
             Double rating2 = ratings2.get(u1.getKey());
 
             // Only consider items that are rated by both users
             if (rating2 != null) {
                 double rating1 = u1.getValue();
-                // Difference [0-1] is 1 for equal ratings and 0 for ratings furthest apart (1 and 5)
-                double difference = 1 - Math.pow(Math.abs(rating2 - rating1) / 4.0, 1.5);
-                nominator += Math.pow(difference, 2);
-                length++;
+                ratedByBoth++;
+                nominator += rating1 * rating2;
+                denominator1 += Math.pow(rating1, 2);
+                denominator2 += Math.pow(rating2, 2);
             }
         }
 
-        return nominator / length;
+        double smoothing = Math.min(1, ratedByBoth / 50.0);
+        double rating = nominator / (Math.sqrt(denominator1) * Math.sqrt(denominator2));
+        return smoothing * rating;
     }
 
     private double demographicSimilarity(User u1, User u2) {
