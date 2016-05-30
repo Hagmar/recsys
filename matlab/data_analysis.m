@@ -4,7 +4,19 @@ clear
 cla
 clc
 
+% IF YOU CHANGE THE DATA SET, DON't FORGET TO CHANGE THE FILE NAMES
+% FOR Z-SCORE AND GAUSSIAN NORMALISATION.
+
+% 100K
 load u.data
+
+% 1m
+% load ratings.dat
+% size(ratings);
+% u = ratings;
+
+% 20m Too big
+%u = csvread('ratings.csv',1,0);  
 
 n_users = max(u(:,1));
 n_movies = max(u(:,2));
@@ -20,6 +32,14 @@ for i = 1:n_ratings
    m_index = u(i,2);
    data(m_index, u_index) = u(i,3);
 end
+
+% Remove all non-rated items (specifically for 1m data set)
+% not_rated = find(nansum(data')==0);   % Find all items which have not been rated
+% [r c] = size(not_rated);
+% index = find(nansum(data')~=0);
+% data = data(index,:);
+% n_movies = n_movies - c;
+
 
 % Min, max, mean and median rating - not very interesting?
 min_rat = nanmin(u(:,3))
@@ -40,7 +60,7 @@ xlabel('Ratings')
 ylabel('# of ratings')
 title('100K ratings data set')
 
-%%
+%% 3 for missing data
 % Normalisation of the data
 % Each missing rating is replaced by 3 (trivial with so many non-rated
 % movies
@@ -59,7 +79,7 @@ xlabel('Ratings')
 ylabel('# of ratings')
 title('100K ratings data set, non-rated items set to 3')
 
-%%
+%% Average by movies 
 % Normalisation of data using average rating of movie, rounded up to
 % nearest integer
 data_mav = data;
@@ -83,7 +103,7 @@ xlabel('Ratings')
 ylabel('# of ratings')
 title('Non-rated items set to average rating of item')
 
-%%
+%% Average rating by user
 % Normalisation using average ratings of user, rounded up to nearest
 % integer
 data_uav = data;
@@ -112,6 +132,7 @@ title('Non-rated items set to average rating by user')
 % been set to the average rating of that item first
 data_z = data_mav;
 data_z = zscore(data_z);
+
 % Remove items that weren't originally rated
 index = find(isnan(data));
 data_z(index) = NaN;

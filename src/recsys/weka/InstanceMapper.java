@@ -31,7 +31,8 @@ class InstanceMapper {
                 instanceMovie = movieMap.put(movieId, mapMovie(instance));
             }
 
-            data.add(mapUser(instance), instanceMovie, (int) instance.value(2));
+            // user, movie, rating
+            data.add(mapUser(instance), instanceMovie, instance.value(2));
         }
         return data;
     }
