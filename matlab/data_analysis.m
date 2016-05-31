@@ -173,14 +173,3 @@ save_pn(:,2) = r;
 index = find(~isnan(enumerator));
 save_pn(:,3) = enumerator(index);
 csvwrite('p_norm.csv', save_pn)
-
-
-
-
-
-
-%%
-% Mean ratings of movies vs. number of movies
-
-%%
-% FPR vs. TPR for user-based CF, random items, popular items
