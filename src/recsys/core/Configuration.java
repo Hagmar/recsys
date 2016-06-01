@@ -40,7 +40,7 @@ public class Configuration {
      * Determines how much to weight genre similarity when comparing movies. 1 minus
      * this value is the weight for year similarity.
      */
-    public static final double MOVIE_GENRE_SIMILARITY_WEIGHT = 0.8;
+    public static final double MOVIE_GENRE_SIMILARITY_WEIGHT = 0.2;
     /**
      * The number of genres that exist. Needed to determine the size of the genre
      * array for movies.

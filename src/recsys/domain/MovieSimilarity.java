@@ -11,8 +11,8 @@ import java.util.Map;
  */
 public class MovieSimilarity implements ItemSimilarityFunction<Movie>, Serializable{
 
-    private static final double YEAR_WEIGHT = Configuration.MOVIE_GENRE_SIMILARITY_WEIGHT;
-    private static final double GENRE_WEIGHT = 1 - YEAR_WEIGHT;
+    private static final double GENRE_WEIGHT = Configuration.MOVIE_GENRE_SIMILARITY_WEIGHT;
+    private static final double YEAR_WEIGHT = 1 - GENRE_WEIGHT;
 
     public double similarity(Movie m1, Movie m2) {
         if (m1 == null || m2 == null)
@@ -23,7 +23,8 @@ public class MovieSimilarity implements ItemSimilarityFunction<Movie>, Serializa
             yearSimilarity = 0;
         } else {
             yearSimilarity = Math.abs(m1.getYear() - m2.getYear());
-            yearSimilarity = 1-(Math.pow(yearSimilarity, 2)/2500.0);
+            // 0 similarity when year difference is 30 or greater
+            yearSimilarity = 1-(Math.pow(yearSimilarity, 2)/900.0);
             yearSimilarity = Math.max(yearSimilarity, 0);
         }
         double genreSimilarity = cosineSimilarity(m1, m2);
