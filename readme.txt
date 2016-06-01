@@ -10,5 +10,12 @@ Setting up of the environment:
 
 3. Python and SQLite database setup
 
+4. Run "compile.sh". This downloads dependencies and compiles the Java application.
+
+
 Run:
-1. 
+- Evaluation: 10-fold cross validation (comparison with Linear regression)
+  1. Run "run.sh".
+
+- Command line interface - for testing individual predictions
+  1. Run "run.sh cli".
