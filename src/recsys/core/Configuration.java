@@ -7,7 +7,7 @@ public class Configuration {
     /**
      * The number of nearest neighbors (k) to use for prediction.
      */
-    public static final int NEAREST_NEIGHBORS_NUMBER = 30;
+    public static final int NEAREST_NEIGHBORS_NUMBER = 18;
     /**
      * The number of nearest neighbors (k) to use for content-based prediction on
      * movie features.
@@ -40,7 +40,7 @@ public class Configuration {
      * Determines how much to weight genre similarity when comparing movies. 1 minus
      * this value is the weight for year similarity.
      */
-    public static final double MOVIE_GENRE_SIMILARITY_WEIGHT = 0.8;
+    public static final double MOVIE_GENRE_SIMILARITY_WEIGHT = 0.2;
     /**
      * The number of genres that exist. Needed to determine the size of the genre
      * array for movies.

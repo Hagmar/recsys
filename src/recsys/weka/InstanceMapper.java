@@ -17,6 +17,7 @@ import java.util.Map;
  */
 class InstanceMapper {
 
+    @SuppressWarnings("unchecked")
     public static Data<User, Movie> map(Instances instances) {
         InMemoryData data = new InMemoryData();
         Enumeration<Instance> enumeration = instances.enumerateInstances();
