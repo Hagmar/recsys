@@ -1,16 +1,16 @@
 Recommender System
 
-The project consists of the following files:
-data_analysis.m
-
 Setting up of the environment:
-1. Download and extract the zip-file ml-100k.zip from GroupLens' web page: http://grouplens.org/datasets/movielens/ (Last verified on 1 June)
+1. Download the zip-file ml-100k.zip from GroupLens' web page: http://grouplens.org/datasets/movielens/ (Last verified on 1 June). Extract to the project root.
 
 2. Run the m-file data_analysis.m using MatLab, make sure the extracted file u.data exists in the same folder. This will overwrite u.data, if you want to run the script again you have to copy in a new version of the original u.data.
 
-3. Python and SQLite database setup
+3. Make sure project root is the current working directory for all steps.
 
-4. Run "compile.sh". This downloads dependencies and compiles the Java application.
+4. Run "create_database.py" (in the "database" folder) on the new u.data
+    "database/create_database.py -d ml-100k/"
+
+5. Run "compile.sh". This downloads dependencies and compiles the Java application.
 
 
 Run:
