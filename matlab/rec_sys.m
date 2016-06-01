@@ -61,11 +61,3 @@ est_rat(ind) = 2.5;
 error2 = nanmean((a(:,n_training+1:n_users) - est_rat).^2);
 mean_tot_error = mean(error2)
 
-
-% Idea for some clustering:
-% Plot with x axis difference with avg_rating, y axis difference with
-% largest variance item
-
-% Plot similarity of one user compared to all the others
-% figure(1)
-% plot(user_likeness(4,:))
