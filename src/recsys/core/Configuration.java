@@ -7,7 +7,7 @@ public class Configuration {
     /**
      * The number of nearest neighbors (k) to use for prediction.
      */
-    public static final int NEAREST_NEIGHBORS_NUMBER = 30;
+    public static final int NEAREST_NEIGHBORS_NUMBER = 18;
     /**
      * The number of nearest neighbors (k) to use for content-based prediction on
      * movie features.
