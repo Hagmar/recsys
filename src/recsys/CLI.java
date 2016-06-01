@@ -1,6 +1,9 @@
 package recsys;
 
+import recsys.core.Data;
 import recsys.core.RecommenderSystem;
+import recsys.domain.Movie;
+import recsys.domain.SqliteData;
 import recsys.domain.User;
 
 import java.io.BufferedReader;
@@ -21,11 +24,11 @@ import java.util.List;
 public class CLI {
 
     private static final String PREDICT_USAGE = "predict <user-id> <item-id>";
-    private static final String RECOMMEND_USAGE = "recommend <user-id> <limit-results>";
 
-    private RecommenderSystem<User, Integer> system;
+    private RecommenderSystem<User, Movie> system;
+    private SqliteData data = new SqliteData();
 
-    public CLI(RecommenderSystem<User, Integer> system) {
+    public CLI(RecommenderSystem<User, Movie> system) {
         this.system = system;
     }
 
@@ -53,28 +56,14 @@ public class CLI {
             } else if (command.startsWith("help")) {
                 System.out.println("Available commands:");
                 System.out.println(PREDICT_USAGE);
-                System.out.println(RECOMMEND_USAGE);
             } else if (command.startsWith("predict")) {
                 try {
-                    User user = new User(Integer.parseInt(args.get(0)));
-                    int item = Integer.parseInt(args.get(1));
+                    User user = data.getUser(Integer.parseInt(args.get(0)));
+                    Movie item = data.getItem(Integer.parseInt(args.get(1)));
                     double result = system.predictRating(user, item);
                     System.out.println("Predicted rating: " + result);
                 } catch (Exception e) {
                     System.out.println("Usage: " + PREDICT_USAGE);
-                }
-            } else if (command.startsWith("recommend")) {
-                try {
-                    User user = new User(Integer.parseInt(args.get(0)));
-                    int limitItems = Integer.parseInt(args.get(1));
-                    Collection<Integer> result = system.getRecommendedItems(user, limitItems);
-                    System.out.println("Recommended items (" + result.size() + "):");
-                    for (Integer item : result) {
-                        System.out.println(item);
-                    }
-                    System.out.println("--end--");
-                } catch (Exception e) {
-                    System.out.println("Usage: " + RECOMMEND_USAGE);
                 }
             } else {
                 System.out.println("Unknown command. Type help for list of commands.");

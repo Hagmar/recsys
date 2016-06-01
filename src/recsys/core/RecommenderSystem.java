@@ -100,11 +100,6 @@ public class RecommenderSystem<User, Item> implements Serializable {
             return sum / Configuration.MOVIE_NEAREST_NEIGHBORS_NUMBER;
         }
     }
-
-    public Collection<Item> getRecommendedItems(User user, int numberOfItems) {
-        // TODO: Implement
-        return new LinkedList<>();
-    }
     
     /**
      * Finds the k nearest neighbors of user in users (will include user if user is in users).

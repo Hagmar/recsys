@@ -11,7 +11,7 @@ public class Movie implements Serializable {
     private boolean[] genres;
 
     public Movie(int id) {
-        this(id, 0, null);
+        this(id, 0, new boolean[0]);
     }
 
     public Movie(int id, int year, boolean[] genres) {
