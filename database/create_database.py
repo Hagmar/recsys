@@ -32,7 +32,7 @@ def main():
 def parse_args():
     parser = argparse.ArgumentParser(description='Create database from MovieLens dataset')
     parser.add_argument('dataset', help='Zip-file containing the dataset')
-    parser.add_argument('database', nargs='?', help='The file in which to store the database. Defaults to "movielens.db", in the current working directory')
+    parser.add_argument('database', nargs='?', help='The file in which to store the database. Defaults to "movielens.db", in the extracted directory')
     parser.add_argument('-d', '--d', action='store_true', help='Interpret provided dataset as a folder where data has already been extracted instead of as a zip')
     parser.add_argument('--mode', choices=['100K', '1M', '10M', '20M'], default='100K', help='Specify which format the dataset is in')
 
