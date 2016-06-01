@@ -173,3 +173,4 @@ save_pn(:,2) = r;
 index = find(~isnan(enumerator));
 save_pn(:,3) = enumerator(index);
 csvwrite('p_norm.csv', save_pn)
+dlmwrite('u.data',save_pn,'delimiter','\t')
