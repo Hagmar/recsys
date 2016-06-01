@@ -8,7 +8,7 @@ clc
 % FOR Z-SCORE AND GAUSSIAN NORMALISATION.
 
 % 100K
-load u.data
+load ml-100k/u.data
 
 % 1m
 % load ratings.dat
@@ -173,4 +173,4 @@ save_pn(:,2) = r;
 index = find(~isnan(enumerator));
 save_pn(:,3) = enumerator(index);
 csvwrite('p_norm.csv', save_pn)
-dlmwrite('u.data',save_pn,'delimiter','\t')
+dlmwrite('ml-100k/u.data',save_pn,'delimiter','\t')
